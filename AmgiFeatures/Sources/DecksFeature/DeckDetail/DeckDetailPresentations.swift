@@ -11,6 +11,7 @@ import Theme
 import SwiftNavigation
 import SwiftUINavigation
 import ReviewFeature
+import BrowseFeature
 import UniformTypeIdentifiers  // UTType.data
 
 // Two ViewModifiers split out from `DeckDetailView.body` so the SwiftUI
@@ -20,14 +21,22 @@ import UniformTypeIdentifiers  // UTType.data
 
 struct SheetCoverModifier: ViewModifier {
     let destination: Binding<DeckDetailDestination?>
-    let deckId: DeckID
+    let deck: DeckInfo
     let onReviewDismiss: () -> Void
     let sheetContent: (DeckDetailSheet) -> AnyView
 
     func body(content: Content) -> some View {
         content
             .fullScreenCover(isPresented: destination.review) {
-                ReviewView(deckId: deckId) { onReviewDismiss() }
+                ReviewView(deckId: deck.id) { onReviewDismiss() }
+            }
+            .fullScreenCover(isPresented: destination.practice) {
+                ReviewView(deckId: deck.id, mode: .practice) { onReviewDismiss() }
+            }
+            .fullScreenCover(isPresented: destination.browse) {
+                NavigationStack {
+                    BrowseView(initialDeck: deck)
+                }
             }
             .sheet(item: destination.sheet) { sheet in
                 sheetContent(sheet)

@@ -32,6 +32,12 @@ package struct BrowseView: View {
         _model = State(initialValue: BrowseModel())
     }
 
+    /// Deck-scoped browse: the model is seeded with the deck as its active
+    /// filter, so the list opens showing only that deck's notes.
+    package init(initialDeck: DeckInfo) {
+        _model = State(initialValue: BrowseModel(initialDeck: initialDeck))
+    }
+
     /// Seeded init for previews and tests — `BrowseModel` stays package-internal
     /// so the target's public surface is the four entry views, nothing more.
     init(model: BrowseModel) {

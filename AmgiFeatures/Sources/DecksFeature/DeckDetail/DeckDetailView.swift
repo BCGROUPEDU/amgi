@@ -84,7 +84,7 @@ struct DeckDetailView: View {
         contentWithToolbar
             .modifier(SheetCoverModifier(
                 destination: $destination,
-                deckId: deck.id,
+                deck: deck,
                 onReviewDismiss: {
                     destination = nil
                     store.invalidateAll()
@@ -185,6 +185,10 @@ private extension DeckDetailView {
         switch action {
         case .studyNow:
             destination = .review
+        case .browseCards:
+            destination = .browse
+        case .practice:
+            destination = .practice
         case .rebuild:
             Task { await runRebuild() }
         case .emptyDeck:

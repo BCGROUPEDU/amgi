@@ -71,6 +71,22 @@ final class BrowseModel {
     @ObservationIgnored @Dependency(\.tagClient) private var tagClient
     @ObservationIgnored @Dependency(\.notetypesService) private var notetypesService
 
+    // MARK: - Init
+
+    /// Plain "browse everything" model — the package default and the entry
+    /// reached from the Decks tab.
+    init() {}
+
+    /// Deck-scoped model: pre-selects a deck as both the parent and the active
+    /// filter, so the very first search is `deck:"<name>"` while the filter bar
+    /// still lets the user widen to the whole collection. Nothing here mutates
+    /// the collection — it is a read-only scope, exactly like the Decks→Browse
+    /// edge.
+    init(initialDeck: DeckInfo) {
+        parentDeck = initialDeck
+        activeDeck = initialDeck
+    }
+
     // MARK: - Derived
 
     /// Stored, not computed: `body` reads this on every pass, and a computed

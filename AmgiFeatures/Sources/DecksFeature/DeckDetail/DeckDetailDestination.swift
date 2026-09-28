@@ -14,6 +14,8 @@ import CasePaths
 @CasePathable
 enum DeckDetailDestination {
     case review
+    case practice
+    case browse
     case alert(DeckDetailAlert)
     case sheet(DeckDetailSheet)
 }

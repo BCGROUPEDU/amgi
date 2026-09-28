@@ -25,6 +25,8 @@ public struct DeckDetailScreen<HeatmapSlot: View>: View {
         case studyNow
         case rebuild
         case emptyDeck
+        case browseCards
+        case practice
         case subdeckSelected(DeckSubdeckRowData)
     }
 
@@ -98,8 +100,34 @@ public struct DeckDetailScreen<HeatmapSlot: View>: View {
         case .loading:
             DeckStudyButton(isDisabled: true, onTap: {})
         case .loaded(let data):
-            DeckStudyButton(isDisabled: data.isEmpty) { onAction(.studyNow) }
+            VStack(spacing: AmgiSpacing.sm) {
+                DeckStudyButton(isDisabled: data.isEmpty) { onAction(.studyNow) }
+                HStack(spacing: AmgiSpacing.sm) {
+                    secondaryAction("Browse Cards", systemImage: "magnifyingglass") {
+                        onAction(.browseCards)
+                    }
+                    secondaryAction("Practice", systemImage: "arrow.clockwise") {
+                        onAction(.practice)
+                    }
+                    .disabled(data.isEmpty)
+                }
+                Text("Practice reviews this deck without changing cards or scheduling.")
+                    .amgiFont(.caption)
+                    .foregroundStyle(palette.textTertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 2)
+            }
         }
+    }
+
+    private func secondaryAction(
+        _ title: String,
+        systemImage: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(title, systemImage: systemImage, action: action)
+            .buttonStyle(AmgiSecondaryButtonStyle())
+            .frame(maxWidth: .infinity)
     }
 
     @ViewBuilder
