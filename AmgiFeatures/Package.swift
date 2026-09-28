@@ -198,6 +198,17 @@ let package = Package(
             ],
             swiftSettings: sharedSwiftSettings
         ),
+        .testTarget(
+            name: "ReviewCoreTests",
+            dependencies: [
+                "ReviewCore",
+                .product(name: "AnkiKit", package: "amgi"),
+                .product(name: "AnkiClients", package: "amgi"),
+                .product(name: "AnkiServices", package: "amgi"),
+                .product(name: "Dependencies", package: "swift-dependencies"),
+            ],
+            swiftSettings: sharedSwiftSettings
+        ),
         // Deck list, deck detail, deck config + the FSRS simulator, and the
         // profile picker. Depends on ReviewFeature only to present ReviewView
         // off a deck row.
