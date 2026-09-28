@@ -57,13 +57,26 @@ struct ReviewContent: View {
                 #endif
 
                 if showRemainingDays && session.startError == nil {
-                    ReviewProgressBar(session: session)
+                    DeckCountsProgressBar(
+                        newCount: session.remainingCounts.newCount,
+                        learnCount: session.remainingCounts.learnCount,
+                        reviewCount: session.remainingCounts.reviewCount,
+                        showsCounts: true
+                    )
+                    .padding(.horizontal)
+                    .padding(.top, 8)
+                    .padding(.bottom, 6)
                 }
 
                 if let startError = session.startError {
                     ReviewStartFailureView(message: startError) { session.start() }
                 } else if session.isFinished {
-                    ReviewFinishedView(session: session, onDone: onDismiss)
+                    ReviewFinishedView(
+                        session: session,
+                        onDone: onDismiss,
+                        onPracticeAgain: { session.practiceAgain() },
+                        onBrowseCards: { destination = .browseDeck }
+                    )
                 } else {
                     ReviewCardArea(
                         session: session,
@@ -144,6 +157,23 @@ struct ReviewContent: View {
                         onMatched: { lookupHighlight.show(matched: $0) },
                         onDismiss: { destination = nil }
                     )
+                }
+            }
+            .fullScreenCover(isPresented: $destination.browseDeck) {
+                NavigationStack {
+                    BrowseView(
+                        initialDeck: DeckInfo(
+                            id: session.deckId,
+                            name: session.deckName,
+                            counts: session.remainingCounts,
+                            isFiltered: false
+                        )
+                    )
+                }
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Done") { destination = nil }
+                    }
                 }
             }
         }
@@ -360,29 +390,6 @@ private struct CardActionsMenu: View {
     }
 }
 
-// MARK: - Progress
-
-private struct ReviewProgressBar: View {
-    let session: ReviewSession
-
-    @Environment(\.palette) private var palette
-
-    var body: some View {
-        let fraction = min(max(session.progressFraction, 0), 1)
-        ZStack(alignment: .leading) {
-            Capsule().fill(palette.separator)
-            Capsule()
-                .fill(palette.accent)
-                .scaleEffect(x: fraction, y: 1, anchor: .leading)
-        }
-        .frame(height: 3)
-        .padding(.horizontal)
-        .padding(.top, 6)
-        .padding(.bottom, 2)
-        .animation(AmgiMotion.standard, value: fraction)
-    }
-}
-
 // MARK: - Terminal states
 
 private struct ReviewStartFailureView: View {
@@ -404,6 +411,8 @@ private struct ReviewStartFailureView: View {
 private struct ReviewFinishedView: View {
     let session: ReviewSession
     let onDone: () -> Void
+    let onPracticeAgain: () -> Void
+    let onBrowseCards: () -> Void
 
     @Environment(\.palette) private var palette
     @ScaledMetric(relativeTo: .largeTitle) private var glyphSize: CGFloat = 64
@@ -414,11 +423,11 @@ private struct ReviewFinishedView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: glyphSize))
                 .foregroundStyle(palette.positive)
-                .accessibilityHidden(true)   // "Congratulations!" below says it
-            Text("Congratulations!")
+                .accessibilityHidden(true)   // the title below says it
+            Text(title)
                 .amgiFont(.sectionHeading)
                 .foregroundStyle(palette.textPrimary)
-            Text("You've reviewed \(session.sessionStats.reviewed) cards")
+            Text(subtitle)
                 .amgiFont(.body)
                 .foregroundStyle(palette.textSecondary)
             if session.sessionStats.reviewed > 0 {
@@ -427,10 +436,41 @@ private struct ReviewFinishedView: View {
                     .foregroundStyle(palette.textSecondary)
             }
             Spacer()
-            Button("Done", action: onDone)
-                .buttonStyle(AmgiPrimaryButtonStyle())
-                .padding()
+            VStack(spacing: AmgiSpacing.sm) {
+                HStack(spacing: AmgiSpacing.sm) {
+                    Button {
+                        onBrowseCards()
+                    } label: {
+                        Label("Browse Cards", systemImage: "magnifyingglass")
+                    }
+                    .buttonStyle(AmgiSecondaryButtonStyle())
+                    .frame(maxWidth: .infinity)
+
+                    Button {
+                        onPracticeAgain()
+                    } label: {
+                        Label("Practice Again", systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(AmgiSecondaryButtonStyle())
+                    .frame(maxWidth: .infinity)
+                }
+                Button("Done", action: onDone)
+                    .buttonStyle(AmgiPrimaryButtonStyle())
+                    .padding(.top, 4)
+            }
+            .padding()
+            .padding(.horizontal)
         }
+    }
+
+    private var isPractice: Bool { session.mode == .practice }
+
+    private var title: String {
+        isPractice ? "Practice complete!" : "Congratulations!"
+    }
+
+    private var subtitle: String {
+        "You've \(isPractice ? "practiced" : "reviewed") \(session.sessionStats.reviewed) cards"
     }
 }
 
