@@ -23,9 +23,25 @@ public enum ResolvedRenderMode: Equatable, Sendable {
     case html
 }
 
+/// What a review session is allowed to mutate.
+public enum ReviewMode: Sendable, Equatable {
+    /// Normal SRS review: every answer schedules the card through the engine.
+    case review
+    /// Practice: replays the due queue with the same UI, but a rating only
+    /// advances locally — `answerReviewCard` is never called, no scheduler or
+    /// collection state changes, and undo stays disabled. Numeric/typed
+    /// answers and media behave exactly as in a real review.
+    case practice
+}
+
 @Observable @MainActor
 public final class ReviewSession {
     public let deckId: DeckID
+
+    /// The session's mutation contract. Fixed at init, except `practiceAgain()`
+    /// flips a finished normal session in place — that is the "Practice Again"
+    /// entry on the completed screen, and it must not leave the existing item.
+    public private(set) var mode: ReviewMode
 
     @ObservationIgnored @Dependency(\.decksService) var decks
     @ObservationIgnored @Dependency(\.schedulerService) var scheduler
@@ -130,8 +146,9 @@ public final class ReviewSession {
 
     // MARK: - Init
 
-    public init(deckId: DeckID) {
+    public init(deckId: DeckID, mode: ReviewMode = .review) {
         self.deckId = deckId
+        self.mode = mode
     }
 
     // MARK: - Public interface
@@ -174,6 +191,31 @@ public final class ReviewSession {
                 startError = error.localizedDescription
             }
         }
+    }
+
+    /// Replays the deck in practice mode from the finished screen. Flips the
+    /// session to `.practice`, resets the run-level state, and fetches the due
+    /// queue again (read-only) — because the session is already presented
+    /// full-screen, this avoids stacking another cover and keeps "Practice
+    /// Again" a single in-place restart.
+    public func practiceAgain() {
+        mode = .practice
+        sessionStats = SessionStats()
+        remainingCounts = .zero
+        cardQueue = []
+        currentQueuedCard = nil
+        currentNote = nil
+        isFinished = false
+        canUndo = false
+        showAnswer = false
+        answerTapCount = 0
+        tappedRating = .good
+        undoneCount = 0
+        lastRating = nil
+        typedAnswer = ""
+        typedAnswerState = nil
+        invalidatePrefetch()
+        start()
     }
 
     /// Flips to the answer side immediately. For typed-answer cards the diff
@@ -228,6 +270,19 @@ public final class ReviewSession {
 
         answerTapCount += 1
         tappedRating = rating
+
+        // Practice is a local replay: the rating records accuracy in the
+        // session and pops the queue, but never reaches the scheduler. This
+        // is what makes it harmless from the collection's point of view.
+        guard mode == .review else {
+            Task {
+                defer { isAdvancing = false }
+                await AppSignpost.measure("PracticeCard") {
+                    await answerPracticeLocally(rating: rating, timeSpent: timeSpent)
+                }
+            }
+            return
+        }
 
         // The interval brackets the whole tap-to-next-card wait, not the
         // synchronous prologue above: the scheduler round-trip and the
@@ -412,6 +467,41 @@ public final class ReviewSession {
 
 private extension ReviewSession {
     // MARK: - Private: card advancement
+
+    /// Practice-only answer path. Advances the session exactly like a real
+    /// review, but the only mutation is the session's own state: the queue
+    /// head is dropped locally and `remainingCounts` is decremented by the
+    /// answered card's queue kind. No scheduler call, no `getQueuedCards`
+    /// refetch, no undo slot (so `undo()` is unreachable via `canUndo`).
+    func answerPracticeLocally(rating: Rating, timeSpent: UInt32) async {
+        guard let queued = currentQueuedCard else { return }
+        answerError = nil
+        sessionStats.reviewed += 1
+        if rating != .again { sessionStats.correct += 1 }
+        sessionStats.totalTimeMs += Int(timeSpent)
+        decrementRemainingCounts(for: queued.card.queue)
+        cardQueue.removeFirst()
+
+        let notes = self.notes
+        let notetypes = self.notetypes
+        let notetypesClient = self.notetypesClient
+        let cardRendering = self.cardRendering
+        await advanceToNextCard(
+            notes: notes,
+            notetypes: notetypes,
+            notetypesClient: notetypesClient,
+            cardRendering: cardRendering
+        )
+    }
+
+    func decrementRemainingCounts(for queue: Int16) {
+        switch queue {
+        case 0: remainingCounts.newCount = max(0, remainingCounts.newCount - 1)
+        case 1, 3: remainingCounts.learnCount = max(0, remainingCounts.learnCount - 1)
+        case 2: remainingCounts.reviewCount = max(0, remainingCounts.reviewCount - 1)
+        default: break   // suspended/buried cards never reach the queue
+        }
+    }
 
     /// Advances to the next queued card. Pops the queue on the main actor,
     /// then renders the card off the main actor via `Task.detached` and

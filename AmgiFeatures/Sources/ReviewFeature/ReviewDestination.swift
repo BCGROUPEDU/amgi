@@ -27,6 +27,8 @@ enum ReviewDestination {
     case editNote(NoteRecord)
     case editTemplate(ReviewSession.TemplateTarget)
     case lookup(String)
+    /// Deck-scoped browse reachable from the completed screen.
+    case browseDeck
 }
 
 extension Optional where Wrapped == ReviewDestination {

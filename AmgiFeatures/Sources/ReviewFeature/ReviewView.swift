@@ -28,6 +28,7 @@ import SwiftUINavigation
 /// `#Preview`s build with a stub session.
 package struct ReviewView: View {
     let deckId: DeckID
+    let mode: ReviewMode
     let onDismiss: () -> Void
 
     @Shared(.appStorage(ReviewPreferences.Keys.openLinksExternally))
@@ -54,10 +55,11 @@ package struct ReviewView: View {
     @State private var session: ReviewSession
     @State private var destination: ReviewDestination?
 
-    package init(deckId: DeckID, onDismiss: @escaping () -> Void) {
+    package init(deckId: DeckID, mode: ReviewMode = .review, onDismiss: @escaping () -> Void) {
         self.deckId = deckId
+        self.mode = mode
         self.onDismiss = onDismiss
-        self._session = State(initialValue: ReviewSession(deckId: deckId))
+        self._session = State(initialValue: ReviewSession(deckId: deckId, mode: mode))
     }
 
     package var body: some View {
