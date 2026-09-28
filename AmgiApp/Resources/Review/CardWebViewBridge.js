@@ -390,22 +390,33 @@ function amgiRunHooks(hooks) {
 // isDarkMode-only DOM background fallback before this function runs,
 // or the reported chrome color will come from the wrapper instead of
 // the card template itself.
+//
+// The <body> must never be sampled before the template surface: <body> also
+// carries the `card` class (CardWebView sets body.class="card cardN …"), so
+// `document.querySelector('.card')` used to match the body itself. Combined
+// with the hard night-mode rule `body.nightMode { background-color:#111111 }`,
+// the toolbar then always resolved to near-black in dark mode no matter what
+// the card template painted — the "black bar at the top".
 function amgiResolveCardBackground() {
+    var frame = document.getElementById('qa');
+    var cardElement = frame && frame.querySelector('.card');
     var candidates = [
-        document.querySelector('.card'),
-        document.getElementById('qa'),
+        cardElement,          // the template's own surface, if any
+        frame,
         document.body,
         document.documentElement,
     ];
+    var sources = ['card', 'frame', 'body', 'document'];
     for (var i = 0; i < candidates.length; i++) {
         var el = candidates[i];
         if (!el) continue;
         var bg = window.getComputedStyle(el).backgroundColor;
         if (bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)') {
-            return bg;
+            return { color: bg, isCardSurface: i === 0, source: sources[i] };
         }
     }
-    return window.getComputedStyle(document.body).backgroundColor || 'rgba(0, 0, 0, 0)';
+    var bodyBg = window.getComputedStyle(document.body).backgroundColor || 'rgba(0, 0, 0, 0)';
+    return { color: bodyBg, isCardSurface: false, source: 'body' };
 }
 
 function amgiParseCssColor(color) {
@@ -422,7 +433,16 @@ function amgiParseCssColor(color) {
 
 function amgiReportCardTheme() {
     try {
-        var bg = amgiResolveCardBackground();
+        var resolved = amgiResolveCardBackground();
+        var bg = resolved.color;
+        // When the *template surface* resolved to an opaque color, paint the
+        // frame body with it too. The body defaults to `transparent` with a
+        // 20px margin, so a themed card would otherwise sit in a band of the
+        // raw app backdrop (pure black under vividDark) — the "black seams"
+        // around the card, part of the same black-bar bug family.
+        if (resolved.isCardSurface) {
+            amgiApplyBodySurface(bg);
+        }
         var parsed = amgiParseCssColor(bg);
         // Transparent cards have no explicit surface color to sample, so
         // keep the toolbar scheme aligned with the current page theme.
@@ -441,6 +461,16 @@ function amgiReportCardTheme() {
     } catch(e) {
         console.error('Theme report failed', e);
     }
+}
+
+// Paints the frame body with the template surface's color. Only ever sets the
+// color layer (never touches a background-image a template may have hung on
+// body), and only runs for an opaque card-surface color, so the night-mode
+// CSS body rule keeps doing its job when the template is transparent.
+function amgiApplyBodySurface(cssColor) {
+    var parsed = amgiParseCssColor(cssColor);
+    if (!parsed || parsed.a <= 0) return;
+    document.body.style.backgroundColor = cssColor;
 }
 
 function amgiScheduleCardThemeReport() {
