@@ -7,7 +7,7 @@
 
 package import SwiftUI
 import AppShared
-import AnkiKit
+package import AnkiKit
 import Theme
 import SwiftUINavigation
 
