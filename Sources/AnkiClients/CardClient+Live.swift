@@ -49,6 +49,18 @@ extension CardClient: DependencyKey {
                     }
                 }
             },
+            fetchForPractice: { query, limit in
+                try await backendOffload {
+                    let ids: [CardID] = try backend.invoke(.searchCardIds(query: query))
+                    let bounded = ids.prefix(max(0, limit))
+                    var cards: [CardRecord] = []
+                    cards.reserveCapacity(bounded.count)
+                    for id in bounded {
+                        cards.append(try backend.invoke(.getCard(id: id)))
+                    }
+                    return cards
+                }
+            },
             fetchByNote: { noteId in
                 let ids = try await backend.invoke(.cardIDsOfNote(id: noteId))
                 var cards: [CardRecord] = []

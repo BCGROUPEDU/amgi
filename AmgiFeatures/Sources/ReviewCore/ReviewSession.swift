@@ -50,6 +50,7 @@ public final class ReviewSession {
     @ObservationIgnored @Dependency(\.notesService) var notes
     @ObservationIgnored @Dependency(\.notetypesService) var notetypes
     @ObservationIgnored @Dependency(\.notetypesClient) var notetypesClient
+    @ObservationIgnored @Dependency(\.cardClient) var cardClient
 
     public private(set) var frontHTML: String = ""
     public private(set) var backHTML: String = ""
@@ -83,6 +84,9 @@ public final class ReviewSession {
     var notetypeCache: [NotetypeID: Notetype] = [:]
     var currentQueuedCard: QueuedReviewCard?
     private var lastRating: Rating? = nil
+    /// Ordered, de-duplicated cards actually answered in the normal session.
+    /// Practice Again replays this after Anki has rescheduled the cards.
+    private var completedSessionCards: [CardRecord] = []
     private var preparedNext: (id: CardID, card: PreparedCard)?
     @ObservationIgnored private var prefetchTask: Task<Void, Never>?
 
@@ -119,6 +123,10 @@ public final class ReviewSession {
 
     public var currentCardId: CardID? {
         currentQueuedCard?.card.id
+    }
+
+    public var canPracticeAgain: Bool {
+        !completedSessionCards.isEmpty
     }
 
     // MARK: - Session progress
@@ -165,23 +173,36 @@ public final class ReviewSession {
         let notetypes = self.notetypes
         let notetypesClient = self.notetypesClient
         let cardRendering = self.cardRendering
+        let cardClient = self.cardClient
         let deckId = self.deckId
         Task {
             defer { isAdvancing = false }
             do {
-                let (queue, name) = try await Task.detached { () -> (QueuedCardsResult, String) in
-                    try decks.setCurrentDeck(deckId)
-                    let name = (try? decks.getCurrentDeck().name) ?? ""
-                    return (try scheduler.getQueuedCards(200), name)
-                }.value
-                cardQueue = queue.cards
-                deckName = name
-                remainingCounts = DeckCounts(
-                    newCount: queue.newCount,
-                    learnCount: queue.learningCount,
-                    reviewCount: queue.reviewCount
-                )
-                Log.review.info("Started with \(self.cardQueue.count) cards, counts: new=\(queue.newCount) learn=\(queue.learningCount) review=\(queue.reviewCount)")
+                if mode == .practice {
+                    let (cards, name) = try await Task.detached { () async throws -> ([CardRecord], String) in
+                        guard let deck = try decks.fetchAll().first(where: { $0.id == deckId }) else {
+                            return ([], "")
+                        }
+                        return (try await cardClient.fetchForPractice(DeckSearch.term(deck.name), 200), deck.name)
+                    }.value
+                    cardQueue = cards.map(QueuedReviewCard.practice)
+                    deckName = name
+                    remainingCounts = Self.practiceCounts(cards)
+                } else {
+                    let (queue, name) = try await Task.detached { () -> (QueuedCardsResult, String) in
+                        try decks.setCurrentDeck(deckId)
+                        let name = (try? decks.getCurrentDeck().name) ?? ""
+                        return (try scheduler.getQueuedCards(200), name)
+                    }.value
+                    cardQueue = queue.cards
+                    deckName = name
+                    remainingCounts = DeckCounts(
+                        newCount: queue.newCount,
+                        learnCount: queue.learningCount,
+                        reviewCount: queue.reviewCount
+                    )
+                    Log.review.info("Started with \(self.cardQueue.count) cards, counts: new=\(queue.newCount) learn=\(queue.learningCount) review=\(queue.reviewCount)")
+                }
                 await advanceToNextCard(notes: notes, notetypes: notetypes, notetypesClient: notetypesClient, cardRendering: cardRendering)
             } catch {
                 // NOT isFinished: that is the "queue ran dry" state and drives
@@ -193,29 +214,12 @@ public final class ReviewSession {
         }
     }
 
-    /// Replays the deck in practice mode from the finished screen. Flips the
-    /// session to `.practice`, resets the run-level state, and fetches the due
-    /// queue again (read-only) — because the session is already presented
-    /// full-screen, this avoids stacking another cover and keeps "Practice
-    /// Again" a single in-place restart.
+    /// Replays cards answered in the just-finished normal session. It never
+    /// asks Anki for a new due queue: those cards have already been rescheduled.
     public func practiceAgain() {
+        guard !completedSessionCards.isEmpty else { return }
         mode = .practice
-        sessionStats = SessionStats()
-        remainingCounts = .zero
-        cardQueue = []
-        currentQueuedCard = nil
-        currentNote = nil
-        isFinished = false
-        canUndo = false
-        showAnswer = false
-        answerTapCount = 0
-        tappedRating = .good
-        undoneCount = 0
-        lastRating = nil
-        typedAnswer = ""
-        typedAnswerState = nil
-        invalidatePrefetch()
-        start()
+        resetPracticeRun(cards: completedSessionCards)
     }
 
     /// Flips to the answer side immediately. For typed-answer cards the diff
@@ -297,6 +301,9 @@ public final class ReviewSession {
                     }.value
 
                     answerError = nil
+                    if !completedSessionCards.contains(where: { $0.id == queued.card.id }) {
+                        completedSessionCards.append(queued.card)
+                    }
                     sessionStats.reviewed += 1
                     if rating != .again { sessionStats.correct += 1 }
                     sessionStats.totalTimeMs += Int(timeSpent)
@@ -499,7 +506,48 @@ private extension ReviewSession {
         case 0: remainingCounts.newCount = max(0, remainingCounts.newCount - 1)
         case 1, 3: remainingCounts.learnCount = max(0, remainingCounts.learnCount - 1)
         case 2: remainingCounts.reviewCount = max(0, remainingCounts.reviewCount - 1)
-        default: break   // suspended/buried cards never reach the queue
+        default: remainingCounts.reviewCount = max(0, remainingCounts.reviewCount - 1)
+        }
+    }
+
+    func resetPracticeRun(cards: [CardRecord]) {
+        sessionStats = SessionStats()
+        remainingCounts = Self.practiceCounts(cards)
+        cardQueue = cards.map(QueuedReviewCard.practice)
+        currentQueuedCard = nil
+        currentNote = nil
+        isFinished = false
+        canUndo = false
+        showAnswer = false
+        answerTapCount = 0
+        tappedRating = .good
+        undoneCount = 0
+        lastRating = nil
+        typedAnswer = ""
+        typedAnswerState = nil
+        invalidatePrefetch()
+
+        let notes = self.notes
+        let notetypes = self.notetypes
+        let notetypesClient = self.notetypesClient
+        let cardRendering = self.cardRendering
+        Task {
+            await advanceToNextCard(
+                notes: notes,
+                notetypes: notetypes,
+                notetypesClient: notetypesClient,
+                cardRendering: cardRendering
+            )
+        }
+    }
+
+    static func practiceCounts(_ cards: [CardRecord]) -> DeckCounts {
+        cards.reduce(into: .zero) { counts, card in
+            switch card.queue {
+            case 0: counts.newCount += 1
+            case 1, 3: counts.learnCount += 1
+            default: counts.reviewCount += 1
+            }
         }
     }
 

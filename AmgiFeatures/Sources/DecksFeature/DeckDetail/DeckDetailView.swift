@@ -19,6 +19,7 @@ struct DeckDetailView: View {
     let deck: DeckInfo
 
     @Environment(\.palette) private var palette
+    @Environment(\.dismiss) private var dismiss
     @Dependency(\.collectionStore) private var store
     @State private var model: DeckDetailModel
     @State private var destination: DeckDetailDestination?
@@ -48,6 +49,7 @@ struct DeckDetailView: View {
         guard let alert = currentAlert else { return "" }
         switch alert {
         case .empty: return "Empty \"\(shortTitle)\"?"
+        case .delete: return "Delete \"\(shortTitle)\"?"
         case .error(let title, _): return title
         }
     }
@@ -173,6 +175,13 @@ struct DeckDetailView: View {
                     }
                     .disabled(model.exportInProgress)
                 }
+                Section {
+                    Button(role: .destructive) {
+                        destination = .alert(.delete)
+                    } label: {
+                        Label("Delete Deck…", systemImage: "trash")
+                    }
+                }
             } label: {
                 Label("More", systemImage: "ellipsis")
             }
@@ -257,6 +266,11 @@ private extension DeckDetailView {
                 Task { await runEmpty() }
             }
             Button("Cancel", role: .cancel) {}
+        case .delete:
+            Button("Delete", role: .destructive) {
+                Task { await runDelete() }
+            }
+            Button("Cancel", role: .cancel) {}
         case .error:
             Button("OK", role: .cancel) {}
         }
@@ -267,6 +281,8 @@ private extension DeckDetailView {
         switch alert {
         case .empty:
             Text("Cards will be returned to their home decks.")
+        case .delete:
+            Text("This uses Anki's normal deck deletion. Child decks are included when applicable. This action cannot be undone.")
         case .error(_, let message):
             Text(message)
         }
@@ -283,6 +299,15 @@ private extension DeckDetailView {
     func runEmpty() async {
         if let err = await model.empty() {
             destination = .alert(.error(title: "Couldn't empty \"\(shortTitle)\"", message: err))
+        }
+    }
+
+    func runDelete() async {
+        if let err = await model.deleteDeck() {
+            destination = .alert(.error(title: "Couldn't delete \"\(shortTitle)\"", message: err))
+        } else {
+            destination = nil
+            dismiss()
         }
     }
 

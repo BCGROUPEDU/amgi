@@ -85,9 +85,13 @@ private nonisolated static let deckInfo = DeckInfo(
                 }
             )
             $0.decksService = DecksService(
+                fetchAll: { [Self.deckInfo] },
                 setCurrentDeck: { _ in },
                 getCurrentDeck: { Self.deckInfo }
             )
+            $0.cardClient.fetchForPractice = { _, _ in
+                [Self.queued(0, id: 1).card, Self.queued(1, id: 2).card]
+            }
             $0.notesService = NotesService(getNote: { _ in throw StubError() })
             $0.cardRenderingService = CardRenderingService(renderCard: { _ in throw StubError() })
         } operation: {
@@ -164,8 +168,8 @@ private nonisolated static let deckInfo = DeckInfo(
 
     // MARK: practiceAgain()
 
-    @Test("practiceAgain flips a finished session in place and restarts without scheduling")
-    func practiceAgainRestartsInPlace() async {
+    @Test("practiceAgain is unavailable when the completed session had no cards")
+    func practiceAgainDoesNotQueryANewDueQueue() async {
         let getQueueLog = CallLog()
         let answerLog = CallLog()
 
@@ -191,15 +195,47 @@ private nonisolated static let deckInfo = DeckInfo(
 
             session.practiceAgain()
 
-            #expect(session.mode == .practice, "mode flips synchronously before the restart")
-            #expect(session.isFinished == false)
-            #expect(session.sessionStats.reviewed == 0)
-            #expect(session.canUndo == false)
-
-            await waitUntil { session.isFinished }
-            #expect(session.mode == .practice)
+            #expect(session.mode == .review)
+            #expect(session.isFinished)
             #expect(answerLog.all.isEmpty, "an empty rerun must still never schedule")
-            #expect(getQueueLog.all.count == 2, "once for the original run, once for the rerun")
+            #expect(getQueueLog.all.count == 1, "Practice Again must not ask for a new due queue")
+        }
+    }
+
+    @Test("Practice Again replays completed cards after the due queue reaches zero")
+    func practiceAgainReplaysCompletedCards() async {
+        let queueLog = CallLog()
+        let answerLog = CallLog()
+
+        await withDependencies {
+            $0.schedulerService = SchedulerService(
+                getQueuedCards: { _ in
+                    queueLog.record("getQueuedCards")
+                    return queueLog.all.count == 1
+                        ? QueuedCardsResult(cards: [Self.queued(2, id: 42)], newCount: 0, learningCount: 0, reviewCount: 1)
+                        : QueuedCardsResult(cards: [], newCount: 0, learningCount: 0, reviewCount: 0)
+                },
+                answerReviewCard: { _, _, _, _ in answerLog.record("answerReviewCard") }
+            )
+            $0.decksService = DecksService(
+                setCurrentDeck: { _ in }, getCurrentDeck: { Self.deckInfo }
+            )
+        } operation: {
+            let session = ReviewSession(deckId: DeckID(1))
+            session.start()
+            await waitUntil { session.currentQueuedCard?.card.id == CardID(42) }
+            session.answer(rating: .good)
+            await waitUntil { session.isFinished }
+            #expect(answerLog.all.count == 1)
+
+            session.practiceAgain()
+            await waitUntil { session.currentQueuedCard?.card.id == CardID(42) }
+            #expect(session.mode == .practice)
+            session.answer(rating: .good)
+            await waitUntil { session.isFinished }
+
+            #expect(answerLog.all.count == 1, "Practice Again must not schedule the replayed card")
+            #expect(queueLog.all.count == 2, "only normal start and normal answer may use the due queue")
         }
     }
 }

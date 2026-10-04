@@ -12,6 +12,9 @@ import DependenciesMacros
 @DependencyClient
 public struct CardClient: Sendable {
     public var fetchDue: @Sendable (_ deckId: DeckID) async throws -> [CardRecord]
+    /// Read-only cards selected by Anki's own search grammar for local
+    /// practice. This never invokes the scheduler.
+    public var fetchForPractice: @Sendable (_ query: String, _ limit: Int) async throws -> [CardRecord]
     public var fetchByNote: @Sendable (_ noteId: NoteID) async throws -> [CardRecord]
     public var suspend: @Sendable (_ cardId: CardID) async throws -> Void
     public var bury: @Sendable (_ cardId: CardID) async throws -> Void

@@ -11,6 +11,26 @@ public import AnkiKit
 import AnkiProto
 import SwiftProtobuf
 
+extension Request where Response == [CardID] {
+    /// Runs Anki's native card search. This is a read-only lookup for local
+    /// practice queues; it never changes due dates or creates filtered decks.
+    public static func searchCardIds(query: String) -> Self {
+        Self(
+            serviceId: ServiceID.search,
+            methodId: SearchMethod.searchCards,
+            encode: {
+                var proto = Anki_Search_SearchRequest()
+                proto.search = query.isEmpty ? "deck:*" : query
+                return try proto.serializedData()
+            },
+            decode: { bytes in
+                let response = try Anki_Search_SearchResponse(serializedBytes: bytes)
+                return response.ids.map(CardID.init)
+            }
+        )
+    }
+}
+
 // MARK: - getCard
 
 extension Request where Response == CardRecord {

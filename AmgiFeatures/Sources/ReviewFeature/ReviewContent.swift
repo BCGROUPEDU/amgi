@@ -56,7 +56,9 @@ struct ReviewContent: View {
                 macChrome
                 #endif
 
-                if showRemainingDays && session.startError == nil {
+                // `showRemainingDays` controls the legacy next-review-time
+                // presentation; it must not hide the universal session counts.
+                if session.startError == nil {
                     DeckCountsProgressBar(
                         newCount: session.remainingCounts.newCount,
                         learnCount: session.remainingCounts.learnCount,
@@ -452,6 +454,7 @@ private struct ReviewFinishedView: View {
                         Label("Practice Again", systemImage: "arrow.clockwise")
                     }
                     .buttonStyle(AmgiSecondaryButtonStyle())
+                    .disabled(!session.canPracticeAgain)
                     .frame(maxWidth: .infinity)
                 }
                 Button("Done", action: onDone)

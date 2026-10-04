@@ -57,6 +57,20 @@ public struct QueuedReviewCard: Sendable {
         let card = CardRecord(id: cardId, nid: noteId, did: DeckID(1), ord: ord, mod: 0)
         return QueuedReviewCard(card: card, states: states, nextIntervals: [:])
     }
+
+    /// A read-only practice item. It deliberately has no valid scheduling
+    /// states or intervals: practice ratings are never sent to the scheduler.
+    public static func practice(card: CardRecord) -> QueuedReviewCard {
+        let emptyToken = SchedulingStateToken(Data())
+        return QueuedReviewCard(
+            card: card,
+            states: ReviewSchedulingStates(
+                current: emptyToken, again: emptyToken,
+                hard: emptyToken, good: emptyToken, easy: emptyToken
+            ),
+            nextIntervals: [:]
+        )
+    }
 }
 
 public struct QueuedCardsResult: Sendable {

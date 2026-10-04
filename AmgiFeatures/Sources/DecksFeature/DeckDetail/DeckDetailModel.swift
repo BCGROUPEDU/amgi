@@ -140,6 +140,21 @@ final class DeckDetailModel {
         }
     }
 
+    /// Deletes through Anki's official deck operation. The backend owns the
+    /// exact card/note/child-deck/sync semantics; Swift only invalidates views
+    /// after the operation succeeds.
+    func deleteDeck() async -> String? {
+        actionInFlight = true
+        defer { actionInFlight = false }
+        do {
+            let changes = try await deckClient.delete(deck.id)
+            store.apply(changes)
+            return nil
+        } catch {
+            return error.localizedDescription
+        }
+    }
+
     /// Raises today's new *or* review limit for this deck. Returns nil on
     /// success; otherwise an error message to surface.
     func extendLimit(_ kind: DeckLimitKind, by delta: Int32) async -> String? {
