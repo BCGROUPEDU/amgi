@@ -282,7 +282,7 @@ private extension DeckDetailView {
         case .empty:
             Text("Cards will be returned to their home decks.")
         case .delete:
-            Text("This uses Anki's normal deck deletion. Child decks are included when applicable. This action cannot be undone.")
+            Text("Anki will delete cards in this normal deck and any orphaned notes; child decks are included. A filtered deck instead returns cards to their home decks. This action cannot be undone.")
         case .error(_, let message):
             Text(message)
         }
