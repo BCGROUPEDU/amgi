@@ -25,7 +25,7 @@ extension Request where Response == [CardID] {
             },
             decode: { bytes in
                 let response = try Anki_Search_SearchResponse(serializedBytes: bytes)
-                return response.ids.map(CardID.init)
+                return response.ids.map { CardID($0) }
             }
         )
     }
