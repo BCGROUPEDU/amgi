@@ -11,6 +11,7 @@ import Theme
 import SwiftNavigation
 import SwiftUINavigation
 import ReviewFeature
+import ReviewCore
 import BrowseFeature
 import UniformTypeIdentifiers  // UTType.data
 
