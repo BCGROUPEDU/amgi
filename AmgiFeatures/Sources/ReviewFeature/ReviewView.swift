@@ -17,7 +17,7 @@ import Dependencies
 import BrowseFeature
 import TemplatesFeature
 import Sharing
-import ReviewCore
+package import ReviewCore
 import SwiftUINavigation
 
 
