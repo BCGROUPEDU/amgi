@@ -8,6 +8,7 @@
 public import SwiftUI
 import AppCore
 import AppShared
+import BrowseFeature
 import Theme
 import AnkiKit
 import Dependencies
@@ -35,6 +36,7 @@ public struct RootView: View {
     @Bindable private var accountStore = AccountStore.shared
 
     @State private var pendingReviewDeckId: DeckID?
+    @State private var pendingVocabulary: PendingVocabulary?
     @State private var showImport = false
     @State private var refreshID = UUID()
 
@@ -57,13 +59,15 @@ public struct RootView: View {
                 }
             }
             .onOpenURL { url in
-                guard url.scheme == "amgi",
-                      url.host == "review",
-                      let deckIdStr = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                          .queryItems?.first(where: { $0.name == "deckId" })?.value,
-                      let deckId = Int64(deckIdStr)
-                else { return }
-                pendingReviewDeckId = DeckID(deckId)
+                guard let route = AmgiDeepLinkParser.parse(url) else { return }
+                switch route {
+                case .review(let deckID):
+                    pendingVocabulary = nil
+                    pendingReviewDeckId = DeckID(deckID)
+                case .vocabulary(let vocabulary):
+                    pendingReviewDeckId = nil
+                    pendingVocabulary = PendingVocabulary(vocabulary: vocabulary)
+                }
             }
             .themedRoot()
             .environment(\.appFont, AppFont(rawValue: appFontRaw) ?? .system)
@@ -108,7 +112,25 @@ public struct RootView: View {
                 refreshID = UUID()
             }
         }
+        .sheet(item: $pendingVocabulary) { pending in
+            AddNoteView(initialDraft: pending.addNoteDraft) {
+                store.invalidateAll()
+                refreshID = UUID()
+            }
+        }
         .environment(\.lookupPopup, ReaderLookupPopup())
         .environment(\.dictionarySettings, ReaderDictionarySettings())
+    }
+}
+
+private struct PendingVocabulary: Identifiable {
+    let id = UUID()
+    let vocabulary: VocabularyImportDraft
+
+    var addNoteDraft: AddNoteDraft {
+        AddNoteDraft(
+            fieldValues: vocabulary.addNoteFieldValues,
+            tags: ["furilens"]
+        )
     }
 }

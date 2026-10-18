@@ -21,6 +21,7 @@ What Amgi does today. For how it is put together, see [ARCHITECTURE.md](ARCHITEC
 
 ## Notes
 
+- **FuriLens vocabulary handoff** — a validated local deep link can prefill the existing note editor with a selected surface, reading, glosses, source line, optional translation, and source-app label. The user can edit or cancel and must explicitly tap Add before a note is created.
 - **Browser** — search the whole collection with Anki search syntax, deck filter chips (a top-level deck includes its subdecks), tag chips, sorting, and lazy-loaded results.
 - **Editor** — rich field editing with accurate field names pulled from the Rust notetype RPC; multi-select for batch operations.
 - **Tags** — batch tagging from a selection, plus collection-wide tag management.

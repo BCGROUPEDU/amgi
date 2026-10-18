@@ -457,6 +457,7 @@ let package = Package(
             dependencies: [
                 "AppCore",
                 "AppShared",
+                "BrowseFeature",
                 "DecksFeature",
                 "ReaderFeature",
                 "ReviewFeature",
