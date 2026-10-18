@@ -33,7 +33,7 @@ package struct AddNoteView: View {
             AddNoteContent(model: model)
                 .navigationTitle("Add Note")
                 .navigationBarTitleDisplayMode(.inline)
-                .interactiveDismissDisabled(model.hasUnsavedChanges)
+                .interactiveDismissDisabled(model.isSaving || model.hasUnsavedChanges)
                 .confirmationDialog(
                     "Discard this note?",
                     isPresented: $showDiscardConfirm,
@@ -53,6 +53,7 @@ package struct AddNoteView: View {
                                 dismiss()
                             }
                         }
+                        .disabled(model.isSaving)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Add") {

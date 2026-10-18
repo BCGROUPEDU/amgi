@@ -115,6 +115,7 @@ final class AddNoteModel {
     /// `errorMessage` carries the reason. Navigation/dismissal stays with
     /// the View.
     func save() async -> Bool {
+        guard !isSaving else { return false }
         isSaving = true
         errorMessage = nil
         defer { isSaving = false }
