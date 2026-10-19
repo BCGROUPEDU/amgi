@@ -1,5 +1,12 @@
 # Agent handoff
 
+## M11 receiver/build investigation (2026-10-19)
+
+- Branch `codex/m1100-vocabulary-acceptance` starts at exact receiver `628fcb532c20605dcc5539368fc3894b12c3be62`. No application, signing, dependency, schema, collection, or deck change was made. Installed Amgi remains 0.2.0 (7), source commit unknown; do not treat it as the verified receiver.
+- Local Xcode 16.4 / Swift 6.1.2 cannot load the four tools-6.2 manifests. This is not just a header issue: package feature flags, import/concurrency rules, C++ interop, iOS 26 glassEffect, and app/SDK settings need the newer environment. The required root AnkiRustLib.xcframework and native build tools are also absent. Downgrading the receiver in isolation would not make the app build.
+- Existing parser/routing and editable Add Note/save guards were reviewed; no new receiver defect was established. Full application tests and device save/cancel/exactly-one-note remain unverified. Follow `Documentation/M11_COMPATIBLE_BUILD.md` for the supported route, including installed bundle-ID/signing preservation gates.
+- The FuriLens sender and this exact pure receiver still pass 218 isolated compatibility checks in Swift 6 mode on this host; that does not prove Swift 6.2 package or device acceptance. The existing cloud workflow builds, but does not execute the relevant package test suites. No new dispatch was attempted after M10's HTTP 422 Actions-disabled refusals.
+
 ## M9 bounded handoff QA (2026-10-18)
 
 - Branch: `codex/m900-handoff-qa`, based on clean handoff commit `4fcc4c7c55521113ea12dbc5b011b90443ae93fd`. Keep this branch isolated for review; no main merge.

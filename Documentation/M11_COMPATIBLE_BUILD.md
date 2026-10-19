@@ -1,0 +1,70 @@
+# M11 compatible receiver build and delivery
+
+Receiver code baseline: `628fcb532c20605dcc5539368fc3894b12c3be62`.
+M11 branch: `codex/m1100-vocabulary-acceptance`. Documentation-only changes do
+not establish a new installed receiver. Current phone version is 0.2.0 (7),
+with unknown source identity.
+
+## Why a Swift 6.1 header downgrade is not a solution
+
+All four package manifests require tools 6.2 and opt into import/concurrency
+features. Root `Package.swift` expects `AnkiRustLib.xcframework`, which is absent
+locally. AmgiUI uses SDK-26 `glassEffect`; ReaderFeature propagates C++ interop;
+`AmgiApp/project.yml` includes Xcode-26 settings. This host only has Xcode 16.4
+and Swift 6.1.2. The pure URL parser compiles in isolation, but that is not an
+application compatibility result. No requirements were lowered.
+
+## Supported build path
+
+Use the existing `.github/workflows/build-ipa.yml` environment: macos-26,
+Xcode 26.3, recursive checkout, Rust 1.95 with Apple targets plus nightly
+rust-src, protobuf/swift-protobuf and xcodegen. It builds the real Rust
+XCFramework, generates protobufs/project, builds the simulator app and creates
+an unsigned Release IPA. Do not substitute a second card database.
+
+M10 dispatch was refused twice with HTTP 422 "Actions has been disabled for
+this repository", even though the permissions API reported enabled and the
+workflow active. M11 did not retry with unchanged configuration. Owner/platform
+resolution is required. Once the owner verifies the restriction has changed,
+the exact command from this repository is:
+
+```sh
+gh workflow run build-ipa.yml --ref codex/m1100-vocabulary-acceptance
+gh run list --workflow build-ipa.yml --branch codex/m1100-vocabulary-acceptance --limit 1
+```
+
+Inspect that run's head SHA and logs, not an unrelated successful branch. This
+repository is a public fork; never upload signing keys, collections, decks,
+private device captures or vocabulary in artifacts. An unsigned IPA is **not**
+a signed iPhone installer, nor proof that package tests passed.
+
+Alternatively use a Mac with a supported Xcode 26+ SDK/toolchain and enough
+disk space. In a fresh checkout of this branch, initialize its exact recorded
+submodules and follow `Documentation/BUILDING.md` and `agents/build-and-verify.md`:
+build the native XCFramework, generate protobufs, generate the Xcode project,
+then use XcodeBuildMCP build/test tools against an available iOS simulator.
+The authoritative `anki-upstream` revision is the Git gitlink (currently
+`e64c6b1...`), not the outdated "26.05" prose in BUILDING.md. Do not update it.
+
+Run AppCore's `AmgiDeepLinkTests` and BrowseFeature's `AddNoteSaveTests` as well
+as relevant complete package suites. The existing cloud smoke job does not run
+them; a build-for-testing step alone is not executed tests. Follow the repo's
+MCP build/test verification rules and record actual results.
+
+## Installation and acceptance gates
+
+Before signing/installing, compare the produced bundle identifier, application
+identifier, team and keychain/app-group entitlements with the existing installed
+Amgi package. The phone currently reports
+`com.amgiapp.AmgiApp.26QAK2CBK9`, while source project.yml says
+`com.amgiapp.AmgiApp`. Do not change either identifier, re-sign to a guessed
+identity, uninstall the app, or erase its container to make installation pass.
+Use the existing supported signing setup; resolve any mismatch explicitly
+before claiming a data-preserving upgrade is possible.
+
+Record the actual built Git SHA and build metadata in the delivery log. On a
+supported signed build, install as an upgrade only. Use an isolated Basic test
+deck: open the schema-v1 import, inspect/edit fields, Cancel and verify zero
+notes, reopen and Add once, verify one note, then test rapid taps and invalid
+payload rejection. Receipt never authorizes a database write. Do not mark any
+of these physical checks passed based on parser tests or successful launch.
