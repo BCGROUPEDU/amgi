@@ -16,17 +16,35 @@ application compatibility result. No requirements were lowered.
 
 ## Supported build path
 
+### Fork restriction recovered (2026-10-19)
+
+The authenticated Actions page exposed a fork-scale pause and its maintainer
+re-enable button. After verifying the only default-branch workflow is the
+existing manual/version-tag IPA build (no schedules), the user-authorized
+re-enable action succeeded with **Actions Enabled**. The generic permissions
+API alone did not show this separate pause.
+
+One manual run is now building source `b696236aa4b6df5ac7bfa713472bf258526bdefc`
+on `codex/m1100-vocabulary-acceptance` (only documentation differs from receiver
+`628fcb5`): https://github.com/BCGROUPEDU/amgi/actions/runs/39247901107 .
+Do not dispatch another run just because compilation takes time. A queued or
+running job is not a successful build, tested package, artifact or installation.
+User confirmed **SideStore** installed the current Amgi. After successful
+artifact verification, reuse its existing signing/account and app identity;
+never uninstall or invent a replacement bundle identifier. No signing keys or
+collection data are uploaded to the public build.
+
 Use the existing `.github/workflows/build-ipa.yml` environment: macos-26,
 Xcode 26.3, recursive checkout, Rust 1.95 with Apple targets plus nightly
 rust-src, protobuf/swift-protobuf and xcodegen. It builds the real Rust
 XCFramework, generates protobufs/project, builds the simulator app and creates
 an unsigned Release IPA. Do not substitute a second card database.
 
-M10 dispatch was refused twice with HTTP 422 "Actions has been disabled for
+Historically, M10 dispatch was refused twice with HTTP 422 "Actions has been disabled for
 this repository", even though the permissions API reported enabled and the
-workflow active. M11 did not retry with unchanged configuration. Owner/platform
-resolution is required. Once the owner verifies the restriction has changed,
-the exact command from this repository is:
+workflow active. M11 did not retry with unchanged configuration. After the
+verified maintainer re-enable action above, this command started the recorded
+run (do not run it again while that run is active):
 
 ```sh
 gh workflow run build-ipa.yml --ref codex/m1100-vocabulary-acceptance
