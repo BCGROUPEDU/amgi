@@ -1,8 +1,8 @@
 # M11 compatible receiver build and delivery
 
 Receiver code baseline: `628fcb532c20605dcc5539368fc3894b12c3be62`.
-M11 branch: `codex/m1100-vocabulary-acceptance`. Documentation-only changes do
-not establish a new installed receiver. Current phone version is 0.2.0 (7),
+M11 branch: `codex/m1100-vocabulary-acceptance`. Documentation and build-platform
+changes do not establish a new installed receiver. Last confirmed phone version is 0.2.0 (7),
 with unknown source identity.
 
 ## Why a Swift 6.1 header downgrade is not a solution
@@ -24,12 +24,24 @@ existing manual/version-tag IPA build (no schedules), the user-authorized
 re-enable action succeeded with **Actions Enabled**. The generic permissions
 API alone did not show this separate pause.
 
-One manual run is now building source `b696236aa4b6df5ac7bfa713472bf258526bdefc`
+The original manual run built source `b696236aa4b6df5ac7bfa713472bf258526bdefc`
 on `codex/m1100-vocabulary-acceptance` (only documentation differs from receiver
 `628fcb5`): https://github.com/BCGROUPEDU/amgi/actions/runs/39247901107 .
+It failed at the simulator compatibility build: AEXML 4.7.3 requires iOS 17,
+but vendored EPUBKit declared iOS 16. No IPA was produced. On 2026-10-21 the
+user authorized the bounded fix: raise only EPUBKit's iOS minimum to 17 (the
+app remains iOS 18), then dispatch one replacement run on the repaired SHA.
+No dependency version, application ID, signing or receiver behavior is changed.
+Record replacement-run provenance in HANDOFF.md.
+
 Do not dispatch another run just because compilation takes time. A queued or
 running job is not a successful build, tested package, artifact or installation.
-User confirmed **SideStore** installed the current Amgi. After successful
+User confirmed **SideStore** installed the current Amgi, and subsequently
+reported SideStore was uninstalled. Restore it using the official iloader
+route and original Apple Account; do not remove Amgi. Account/2FA, device
+trust and certificate replacement/revocation require the user's involvement.
+Confirm a current Amgi backup saved outside its app container before upgrading.
+After successful
 artifact verification, reuse its existing signing/account and app identity;
 never uninstall or invent a replacement bundle identifier. No signing keys or
 collection data are uploaded to the public build.

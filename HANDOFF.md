@@ -1,5 +1,11 @@
 # Agent handoff
 
+## M11 cloud compatibility repair / SideStore recovery (2026-10-21)
+
+- Run `39247901107` failed at the simulator compatibility build: resolved AEXML 4.7.3 requires iOS 17, while vendored EPUBKit declared iOS 16. No IPA was produced. Raised only EPUBKit's iOS minimum to 17; the containing app remains iOS 18. No dependency version, app identity, signing, receiver, collection or deck changes.
+- The user authorized this repair and restoring uninstalled SideStore. Reuse the original Apple Account/signing path; never uninstall Amgi. SideStore installation is not yet confirmed. Apple Account, 2FA, device trust and any certificate replacement/revocation prompts are explicit user gates. Before an Amgi upgrade, confirm a backup outside its app container and verify the upgrade identity.
+- Validation: `git diff --check` passed; Swift `dump-package` loaded the repaired manifest and reports iOS 17 with unchanged dependency requirements and other platform minima. This is metadata validation, not a full app build or executed package suite. Replacement cloud-run provenance will be recorded below.
+
 ## M11 receiver/build investigation (2026-10-19)
 
 - Cloud recovery: authenticated GitHub Actions page showed a fork-scale pause with the maintainer re-enable control, despite enabled API settings. After verifying default main has only the existing manual/version-tag IPA workflow (no schedules), re-enabled through GitHub's own control; UI confirmed **Actions Enabled**. One manual M11 run was accepted: **39247901107**, source **b696236aa4b6df5ac7bfa713472bf258526bdefc**, branch `codex/m1100-vocabulary-acceptance`, URL https://github.com/BCGROUPEDU/amgi/actions/runs/39247901107 . Source differs from receiver 628fcb5 only in documentation. Build is in progress, not yet an artifact/build/test/install success. No tag/release, key upload, permission-scope change, OS upgrade, or duplicate dispatch occurred. User confirms existing iPhone Amgi was installed through **SideStore**; preserve that same signing/account path and installed identity, never uninstall to update.
