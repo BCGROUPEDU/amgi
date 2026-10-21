@@ -10,7 +10,10 @@ were checked together. A strict-import three-module compiler fixture reproduces
 the failure and passes after the fix; isolated parser tests pass 3/3 and the
 synthetic sender/receiver harness passes 218 checks. No successful full build,
 IPA or new receiver installation is claimed yet. See the latest HANDOFF.md entry
-for replacement-run provenance and outcome. Retain upgrade identity gates.
+for replacement-run provenance and outcome. Replacement run
+https://github.com/BCGROUPEDU/amgi/actions/runs/39691708291 is verified against
+repair commit `5ebd3f6f3f962d2679ee49ddcae307431b28778b`; it is in progress,
+not a successful build/test/archive/installation. Retain upgrade identity gates.
 
 Receiver code baseline: `628fcb532c20605dcc5539368fc3894b12c3be62`.
 M11 branch: `codex/m1100-vocabulary-acceptance`. Documentation and build-platform
