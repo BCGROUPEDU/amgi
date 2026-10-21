@@ -38,7 +38,11 @@ Replacement run: https://github.com/BCGROUPEDU/amgi/actions/runs/39532542321 ,
 verified source `ab2ecffacb5870c52f709b5555137ccc5b5ec361`. It is in progress;
 no artifact or installation has been verified. Apple inventory still registers
 SideStore, but launching it is denied for signature/profile-trust reasons;
-do not assume uninstall is necessary. iloader is waiting for the user's login.
+do not assume uninstall is necessary. Subsequently, the user completed login
+using the approved built-in Jkcoxson (Mac) anisette server. iloader confirmed
+stable SideStore installation and pairing placement; Apple device tools now
+successfully launch its unchanged bundle identifier. On-device VPN/sign-in
+and SideStore refresh remain unverified. Amgi itself has not been upgraded.
 
 Do not dispatch another run just because compilation takes time. A queued or
 running job is not a successful build, tested package, artifact or installation.
