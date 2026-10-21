@@ -228,6 +228,7 @@ let package = Package(
                 "AppShared",
                 "BrowseFeature",
                 "ReviewFeature",
+                "ReviewCore",
                 .product(name: "AnkiKit", package: "amgi"),
                 .product(name: "AnkiClients", package: "amgi"),
                 .product(name: "Theme", package: "AmgiUI"),

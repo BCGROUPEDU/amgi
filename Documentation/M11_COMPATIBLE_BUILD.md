@@ -1,5 +1,17 @@
 # M11 compatible receiver build and delivery
 
+Latest update (2026-10-22): the user confirms an externally saved backup.
+The prior run `39539940321` on `3adc09fc1f9b4a19f2e688a382e99ad875204b6b`
+failed at the explicit `.practice` call in DeckDetailPresentations.swift: the
+defining ReviewCore module was not imported. The bounded fix adds that import
+and declares DecksFeature's existing transitive ReviewCore dependency directly;
+no external package/version or app behavior changes. All related call sites
+were checked together. A strict-import three-module compiler fixture reproduces
+the failure and passes after the fix; isolated parser tests pass 3/3 and the
+synthetic sender/receiver harness passes 218 checks. No successful full build,
+IPA or new receiver installation is claimed yet. See the latest HANDOFF.md entry
+for replacement-run provenance and outcome. Retain upgrade identity gates.
+
 Receiver code baseline: `628fcb532c20605dcc5539368fc3894b12c3be62`.
 M11 branch: `codex/m1100-vocabulary-acceptance`. Documentation and build-platform
 changes do not establish a new installed receiver. Last confirmed phone version is 0.2.0 (7),

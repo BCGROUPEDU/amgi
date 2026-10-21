@@ -1,5 +1,12 @@
 # Agent handoff
 
+## M11 direct practice import repair (2026-10-22, latest)
+
+- User explicitly confirms the backup is saved and authorizes the remaining fix. This satisfies the human backup confirmation gate; artifact, matching signing/app identity and installation evidence are still required. Do not uninstall, erase data, switch Apple Accounts or revoke certificates.
+- Run https://github.com/BCGROUPEDU/amgi/actions/runs/39539940321 on `3adc09fc1f9b4a19f2e688a382e99ad875204b6b` failed at DeckDetailPresentations.swift:34: `.practice` requires an explicit import of its defining ReviewCore module. No simulator tests, Release archive or IPA were produced. Earlier isolated pass results are not a cloud success.
+- Bounded review enumerated every ReviewView/ReviewMode call site: the explicit `.practice` argument is the only missing defining-module import; default-mode calls need no change. Added plain `import ReviewCore` at that internal use and declared DecksFeature's direct dependency on the existing ReviewCore sink. Lead decision: this only makes an already-transitive, already-used API dependency explicit, follows the feature-to-sink rule, adds no external package/version and does not expand the C++ chain. No review, scheduling, reading, handoff-schema or storage behavior changes. Cheap read-only worker independently reviewed the boundary.
+- Verification: a three-module Swift fixture with InternalImportsByDefault and MemberImportVisibility reproduces the exact old missing-import error and passes with the direct import. Exact isolated parser tests reran **3/3 PASS**; the unchanged-source synthetic sender/receiver harness reran **218 PASS**; `git diff --check` passed. Full SDK-26 simulator tests/archive require the next exact-source cloud run, whose provenance/result must be recorded before delivery.
+
 ## M11 import-visibility repair (2026-10-21, latest)
 
 - Replacement run https://github.com/BCGROUPEDU/amgi/actions/runs/39538043504 verified source `5c09750421d51ae1c0749b8c16542fdc07a85b71`. Rust/protobuf/project generation passed and the test-macro errors cleared. Simulator compilation then failed at ReviewFeature/ReviewView.swift:58: its package initializer uses public ReviewCore.ReviewMode through an internal import. Tests, archive and IPA steps were skipped; no IPA exists from this run.
