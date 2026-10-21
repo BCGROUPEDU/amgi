@@ -1,5 +1,13 @@
 # Agent handoff
 
+## M11 receiver artifact verified (2026-10-22 — current)
+
+- Replacement run https://github.com/BCGROUPEDU/amgi/actions/runs/39691708291 completed **SUCCESS**, verified source **5ebd3f6f3f962d2679ee49ddcae307431b28778b**. Simulator build-for-testing and unsigned iphoneos Release archive passed. Later documentation commits do not change that artifact's source.
+- Actual simulator execution: **96/96 Swift Testing tests passed**, AppCoreTests 32 tests / 4 suites and BrowseFeatureTests 64 tests / 10 suites, including Amgi deep links and Add Note save state. Tested on iPhone 17 Pro Max / iOS 26.5. The XCTest wrapper's zero count is not the Swift Testing count. Evidence: run artifact M11-handoff-simulator-tests; local log `/private/tmp/amgi-m11-evidence.y4VDdA/amgi/amgi/m11-handoff-tests.log`. This executes the complete two relevant suites, not every package suite in the repository.
+- Downloaded and statically checked the IPA and build summary. IPA **30,759,569 bytes**, SHA-256 **64467e49ee2aa25141eb511009061fec517ff359f2b958e5061283db18a66eef**, matching the exact-source summary. Safe relative ZIP paths; app `com.amgiapp.AmgiApp`, 0.2.0 (7), iOS 18.0 minimum, `amgi` URL scheme; widget `com.amgiapp.AmgiApp.widget`. No signature, embedded profile or entitlement file: this is intentionally unsigned, not an iPhone-install receipt.
+- Stable local delivery copy: `/Users/jonny/Documents/Apps/native-ios/FuriLens/build/M11-Amgi-5ebd3f6/AmgiApp-unsigned.ipa`, alongside summary/test log, ignored by Git. No executable was run or installed. Source bundle ID must not be hand-edited to the installed SideStore-suffixed ID. Compare the original signing/account/application identifier and relevant entitlements before an upgrade.
+- User confirms the external backup is saved. Device tools and Xcode still show Jonnys iPhone disconnected/unavailable; requested USB connection/unlock. Existing installed Amgi remains last-confirmed 0.2.0 (7), source unknown. No reinstall, signing/account/certificate change, collection mutation or deck deletion. Next: verify matching existing SideStore upgrade identity, install over the existing app without uninstalling, then exercise edit/Cancel/one-note/rapid-tap behavior in an isolated Basic test deck. Physical acceptance remains **PENDING**.
+
 ## M11 direct practice import repair (2026-10-22, latest)
 
 - User explicitly confirms the backup is saved and authorizes the remaining fix. This satisfies the human backup confirmation gate; artifact, matching signing/app identity and installation evidence are still required. Do not uninstall, erase data, switch Apple Accounts or revoke certificates.

@@ -1,19 +1,26 @@
 # M11 compatible receiver build and delivery
 
 Latest update (2026-10-22): the user confirms an externally saved backup.
-The prior run `39539940321` on `3adc09fc1f9b4a19f2e688a382e99ad875204b6b`
-failed at the explicit `.practice` call in DeckDetailPresentations.swift: the
-defining ReviewCore module was not imported. The bounded fix adds that import
-and declares DecksFeature's existing transitive ReviewCore dependency directly;
-no external package/version or app behavior changes. All related call sites
-were checked together. A strict-import three-module compiler fixture reproduces
-the failure and passes after the fix; isolated parser tests pass 3/3 and the
-synthetic sender/receiver harness passes 218 checks. No successful full build,
-IPA or new receiver installation is claimed yet. See the latest HANDOFF.md entry
-for replacement-run provenance and outcome. Replacement run
-https://github.com/BCGROUPEDU/amgi/actions/runs/39691708291 is verified against
-repair commit `5ebd3f6f3f962d2679ee49ddcae307431b28778b`; it is in progress,
-not a successful build/test/archive/installation. Retain upgrade identity gates.
+Replacement run https://github.com/BCGROUPEDU/amgi/actions/runs/39691708291
+completed **SUCCESS** on verified source
+`5ebd3f6f3f962d2679ee49ddcae307431b28778b`. Simulator build-for-testing,
+the complete AppCoreTests (32 tests) and BrowseFeatureTests (64 tests) suites,
+and unsigned iphoneos Release archive/IPA packaging passed. **96/96 actual
+Swift Testing tests passed**, including parser and overlapping-save protection;
+this is not every package suite or physical acceptance. Earlier local isolated
+parser 3/3, compatibility 218 and strict-import fixture passes remain separate.
+
+IPA SHA-256: `64467e49ee2aa25141eb511009061fec517ff359f2b958e5061283db18a66eef`,
+matching the exact-source build summary. Metadata: `com.amgiapp.AmgiApp`,
+0.2.0 (7), iOS 18.0 minimum, `amgi` URL scheme; widget
+`com.amgiapp.AmgiApp.widget`. Safe ZIP paths, intentionally unsigned, no embedded
+profile/entitlements. Stable local copy:
+`/Users/jonny/Documents/Apps/native-ios/FuriLens/build/M11-Amgi-5ebd3f6/AmgiApp-unsigned.ipa`.
+No installation is claimed: Apple tools currently show the phone unavailable.
+Retain the original SideStore account/signing/app identity, compare upgrade
+entitlements, and never uninstall or invent a suffixed source identifier.
+Full provenance and remaining device acceptance are in HANDOFF.md; historical
+failed-run notes below are superseded by this successful build, not erased.
 
 Receiver code baseline: `628fcb532c20605dcc5539368fc3894b12c3be62`.
 M11 branch: `codex/m1100-vocabulary-acceptance`. Documentation and build-platform
