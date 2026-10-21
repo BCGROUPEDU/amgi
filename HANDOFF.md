@@ -1,5 +1,12 @@
 # Agent handoff
 
+## M11 device tunnel diagnostics (2026-10-21, latest)
+
+- SideStore launches, but the user confirms its refresh still fails with the unreachable tunnel-peer/device-endpoint error. Its 7-day label came from iloader signing and is not refresh proof. Amgi remains expired; no Amgi upgrade or collection acceptance has occurred.
+- Directly observed: iOS SideStore Local Network permission enabled; LocalDevVPN 1.3.0 connected with the user-applied tunnel `10.7.0.2/30` and device `10.7.0.1/32`. SideStore Connection Config shows Use Local VPN on, automatic tunnel/device IP and reachability N/A, default RemotePair port 49152. Tested only a manual device-IP override matching the VPN; it reported Active: No. Removed and saved that override afterward, restoring blank override fields and automatic mode. No port guessing, app removal, pairing reset, certificate revocation or Amgi data changes.
+- iPhone Mirroring permits clicks and typing, but scrolling repeatedly closed/relocked it. Xcode screenshots are black while Mirroring is active; Mirroring itself subsequently showed the diagnostics. Do not repeat authentication/scroll loops. Next bounded user step: restart the iPhone, unlock after boot, reconnect Wi-Fi/LocalDevVPN and inspect Connection Config again. Restart is proposed, not yet verified.
+- Cloud run `39532542321` on exact repair `ab2ecffacb5870c52f709b5555137ccc5b5ec361` has now **failed**, superseding earlier in-progress notes. The EPUBKit deployment mismatch is cleared; simulator build-for-testing reached two throwing-call errors in Swift Testing `#require` expansions from AppCoreTests/AmgiDeepLinkTests.swift. No IPA was produced and package tests were not executed. No replacement dispatch since that failure. Fix the evidenced test-compilation defect before one further build; do not bypass tests or lower toolchain requirements.
+
 ## M11 cloud compatibility repair / SideStore recovery (2026-10-21)
 
 - Run `39247901107` failed at the simulator compatibility build: resolved AEXML 4.7.3 requires iOS 17, while vendored EPUBKit declared iOS 16. No IPA was produced. Raised only EPUBKit's iOS minimum to 17; the containing app remains iOS 18. No dependency version, app identity, signing, receiver, collection or deck changes.
