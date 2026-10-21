@@ -34,6 +34,12 @@ app remains iOS 18), then dispatch one replacement run on the repaired SHA.
 No dependency version, application ID, signing or receiver behavior is changed.
 Record replacement-run provenance in HANDOFF.md.
 
+Replacement run: https://github.com/BCGROUPEDU/amgi/actions/runs/39532542321 ,
+verified source `ab2ecffacb5870c52f709b5555137ccc5b5ec361`. It is in progress;
+no artifact or installation has been verified. Apple inventory still registers
+SideStore, but launching it is denied for signature/profile-trust reasons;
+do not assume uninstall is necessary. iloader is waiting for the user's login.
+
 Do not dispatch another run just because compilation takes time. A queued or
 running job is not a successful build, tested package, artifact or installation.
 User confirmed **SideStore** installed the current Amgi, and subsequently
