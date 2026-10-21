@@ -6,7 +6,7 @@ import Testing
 struct AmgiDeepLinkTests {
     @Test("Vocabulary payload validates and maps to safe note fields")
     func vocabularyRoundTrip() throws {
-        let url = try #require(makeURL(payload: [
+        let url = try #require(try makeURL(payload: [
             "schemaVersion": 1,
             "surface": " 新宿 ",
             "reading": "しんじゅく",
@@ -39,13 +39,13 @@ struct AmgiDeepLinkTests {
     func invalidPayloads() throws {
         #expect(AmgiDeepLinkParser.parse(try #require(URL(string: "https://vocabulary/import"))) == nil)
         #expect(AmgiDeepLinkParser.parse(try #require(URL(string: "amgi://vocabulary/import?draft=***"))) == nil)
-        #expect(AmgiDeepLinkParser.parse(try #require(makeURL(payload: [
+        #expect(AmgiDeepLinkParser.parse(try #require(try makeURL(payload: [
             "schemaVersion": 2,
             "surface": "駅",
             "glosses": [],
             "sourceApp": "FuriLens",
         ]))) == nil)
-        #expect(AmgiDeepLinkParser.parse(try #require(makeURL(payload: [
+        #expect(AmgiDeepLinkParser.parse(try #require(try makeURL(payload: [
             "schemaVersion": 1,
             "surface": String(repeating: "駅", count: AmgiDeepLinkParser.maximumSurfaceLength + 1),
             "glosses": [],

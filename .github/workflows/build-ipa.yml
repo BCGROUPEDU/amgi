@@ -133,12 +133,36 @@ jobs:
               2>&1 | tee simulator-build.log
           fi
 
-      # ── 9.5. Run tests ────────────────────────────────────────────
-      # TODO: Add CI test step once testability is sorted out.
-      #       AmgiThemeTests (SPM) require the iOS-only Rust XCFramework,
-      #       so `swift test` doesn't run cleanly on macOS CI runners.
-      #       Xcode integration tests need a test target wired into the
-      #       AmgiApp scheme first.
+      # ── 9.5. M11 receiver/save-state acceptance suites ─────────────
+      # Reuse the existing test plan and signed simulator test bundles.
+      # Keep this delivery verification scoped to the M11 feature branch.
+      - name: Run M11 vocabulary handoff simulator suites
+        if: github.ref == 'refs/heads/codex/m1100-vocabulary-acceptance'
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project AmgiApp/AmgiApp.xcodeproj \
+            -scheme AmgiApp \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            -resultBundlePath "$RUNNER_TEMP/M11HandoffTests.xcresult" \
+            -only-testing:AppCoreTests \
+            -only-testing:BrowseFeatureTests \
+            -skipPackagePluginValidation \
+            -skipMacroValidation \
+            2>&1 | tee m11-handoff-tests.log
+
+      - name: Upload M11 simulator test evidence
+        if: always() && github.ref == 'refs/heads/codex/m1100-vocabulary-acceptance'
+        uses: actions/upload-artifact@v4
+        with:
+          name: M11-handoff-simulator-tests
+          path: |
+            m11-handoff-tests.log
+            ${{ runner.temp }}/M11HandoffTests.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
 
       # ── 10. Build unsigned xcarchive ──────────────────────────────
       # -skipPackagePluginValidation: allows Swift macro plugins (e.g.

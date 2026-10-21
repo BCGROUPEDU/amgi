@@ -1,5 +1,12 @@
 # Agent handoff
 
+## M11 test-compilation repair (2026-10-21, latest)
+
+- User authorized fixing the verified test compilation blocker and completing the existing delivery/acceptance flow. Both cloud diagnostics refer to the same missing inner `try` in `#require(makeURL(...))`; made every throwing helper invocation explicit with `try` at all three occurrences in AmgiDeepLinkTests. Assertions and production parser/receiver/schema are unchanged. Bounded read-only worker reviewed the helper/macro hazard.
+- Actual local execution: the unchanged parser and exact repaired Swift Testing test file were linked into a disposable engine-free SwiftPM harness at `/private/tmp/amgi-m11-parser-tests.XhR8AE`; **3/3 tests passed** on Swift 6.1.2 in Swift 6 language mode. Recompiled the existing synthetic sender/receiver compatibility harness against current source: **218 checks passed**, including 191 sender-accepted corpus payloads and nine correctly sender-size-rejected payloads. `git diff --check` passed. These are not full Swift 6.2 package or iPhone acceptance claims.
+- The existing generated app test plan includes AppCoreTests and BrowseFeatureTests. Added one M11-branch-only simulator execution step for both complete suites, reusing build-for-testing outputs and retaining test evidence. No SDK, dependency, signing, app ID, test assertion or shipping behavior changes; tag/other-branch behavior unchanged. Replacement cloud run and final results pending.
+- User reports the restart/refresh completed and apps were updated. Apple inventory still reports FuriLens 1.0 (3), Amgi 0.2.0 (7), SideStore 0.7.0. Source identity of installed Amgi remains unknown; this is not the new receiver installation. A current externally saved Amgi backup has been requested and is not yet confirmed. Do not install until artifact/identity/backup gates are satisfied.
+
 ## M11 device tunnel diagnostics (2026-10-21, latest)
 
 - SideStore launches, but the user confirms its refresh still fails with the unreachable tunnel-peer/device-endpoint error. Its 7-day label came from iloader signing and is not refresh proof. Amgi remains expired; no Amgi upgrade or collection acceptance has occurred.

@@ -40,17 +40,21 @@ simulator build-for-testing with two unhandled throwing calls in Swift Testing
 `#require` expansions from AppCoreTests/AmgiDeepLinkTests.swift. No IPA was
 produced and no package tests executed. Fix that evidenced compilation defect
 before dispatching one further run; the EPUBKit platform mismatch is cleared.
+The repair adds explicit inner `try` to the three throwing test-helper calls;
+the exact parser tests pass 3/3 in an isolated Swift 6.1 harness, alongside 218
+synthetic sender/receiver checks. This does not establish full app compatibility.
 Apple inventory still registers
 SideStore, but launching it is denied for signature/profile-trust reasons;
 do not assume uninstall is necessary. Subsequently, the user completed login
 using the approved built-in Jkcoxson (Mac) anisette server. iloader confirmed
 stable SideStore installation and pairing placement; Apple device tools now
 successfully launch its unchanged bundle identifier. On-device VPN/sign-in
-and SideStore refresh remain unsuccessful. Local Network permission is enabled
+and SideStore refresh initially remained unsuccessful. Local Network permission is enabled
 and LocalDevVPN connected; SideStore still cannot discover/reach its local
 endpoint. A matching manual device-IP override was tested and removed after
 Active: No. See the latest HANDOFF.md diagnostic entry. Amgi itself has not
-been upgraded.
+been upgraded with a newly verified receiver. The user subsequently reported
+restart/refresh completion; inventory still shows Amgi 0.2.0 (7), source unknown.
 
 Do not dispatch another run just because compilation takes time. A queued or
 running job is not a successful build, tested package, artifact or installation.
@@ -95,9 +99,12 @@ The authoritative `anki-upstream` revision is the Git gitlink (currently
 `e64c6b1...`), not the outdated "26.05" prose in BUILDING.md. Do not update it.
 
 Run AppCore's `AmgiDeepLinkTests` and BrowseFeature's `AddNoteSaveTests` as well
-as relevant complete package suites. The existing cloud smoke job does not run
-them; a build-for-testing step alone is not executed tests. Follow the repo's
-MCP build/test verification rules and record actual results.
+as relevant complete package suites. The repaired M11-branch workflow executes
+the complete AppCoreTests and BrowseFeatureTests simulator suites after
+build-for-testing and retains their log/xcresult as a separate artifact.
+Other branches retain their existing compile-only workflow behavior.
+A build-for-testing step alone is not executed tests. Follow the repo's MCP
+build/test verification rules and record actual results.
 
 ## Installation and acceptance gates
 
