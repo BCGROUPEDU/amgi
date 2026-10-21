@@ -1,5 +1,11 @@
 # Agent handoff
 
+## M11 import-visibility repair (2026-10-21, latest)
+
+- Replacement run https://github.com/BCGROUPEDU/amgi/actions/runs/39538043504 verified source `5c09750421d51ae1c0749b8c16542fdc07a85b71`. Rust/protobuf/project generation passed and the test-macro errors cleared. Simulator compilation then failed at ReviewFeature/ReviewView.swift:58: its package initializer uses public ReviewCore.ReviewMode through an internal import. Tests, archive and IPA steps were skipped; no IPA exists from this run.
+- Minimal repair: `package import ReviewCore` in ReviewView.swift. Existing API visibility and behavior remain unchanged; no review/session/scheduler/data changes. A bounded worker reviewed this exact boundary and its existing caller. An isolated Swift compiler fixture with InternalImportsByDefault reproduced the original error and typechecked successfully with the fixed import. Exact isolated parser tests reran **3/3 PASS**; the earlier current-source compatibility harness remains **218 PASS**. Full app verification awaits one replacement run.
+- Apple device tools confirmed the refreshed existing Amgi 0.2.0 (7) launches. Source commit remains unknown; no new receiver upgrade is claimed. Backup confirmation is still outstanding and Mirroring is locked; do not repeatedly ask for login or install without the backup/identity gates. A read-only SideStore program-cache listing failed to respond and was stopped; no files/data were copied, no alternate access method attempted, and installed entitlements remain unverified.
+
 ## M11 test-compilation repair (2026-10-21, latest)
 
 - User authorized fixing the verified test compilation blocker and completing the existing delivery/acceptance flow. Both cloud diagnostics refer to the same missing inner `try` in `#require(makeURL(...))`; made every throwing helper invocation explicit with `try` at all three occurrences in AmgiDeepLinkTests. Assertions and production parser/receiver/schema are unchanged. Bounded read-only worker reviewed the helper/macro hazard.

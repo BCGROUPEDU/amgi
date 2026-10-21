@@ -43,6 +43,16 @@ before dispatching one further run; the EPUBKit platform mismatch is cleared.
 The repair adds explicit inner `try` to the three throwing test-helper calls;
 the exact parser tests pass 3/3 in an isolated Swift 6.1 harness, alongside 218
 synthetic sender/receiver checks. This does not establish full app compatibility.
+
+The next run, https://github.com/BCGROUPEDU/amgi/actions/runs/39538043504 on
+`5c09750421d51ae1c0749b8c16542fdc07a85b71`, cleared the macro errors but
+failed simulator compilation at ReviewView's package initializer because its
+ReviewMode parameter was imported internally. The bounded repair is
+`package import ReviewCore`; an isolated compiler fixture reproduces the old
+failure and typechecks with that repair. Parser tests still pass 3/3. That run
+executed no simulator suites and produced no IPA. Record the next exact run
+and its outcome in HANDOFF.md; do not treat these local checks as a full build.
+
 Apple inventory still registers
 SideStore, but launching it is denied for signature/profile-trust reasons;
 do not assume uninstall is necessary. Subsequently, the user completed login
