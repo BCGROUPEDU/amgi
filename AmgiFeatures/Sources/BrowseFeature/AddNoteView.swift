@@ -16,33 +16,55 @@ package struct AddNoteView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var model: AddNoteModel
     @State private var showDiscardConfirm = false
+    let isVocabularyImport: Bool
     let onSave: () -> Void
+    let onCancel: () -> Void
 
     package init(
         preselectedDeckId: DeckID? = nil,
         initialDraft: AddNoteDraft? = nil,
+        isVocabularyImport: Bool = false,
+        vocabularyTag: String? = nil,
+        requestTag: String? = nil,
+        onCancel: @escaping () -> Void = {},
         onSave: @escaping () -> Void
     ) {
         let resolved = preselectedDeckId ?? initialDraft?.deckID.map { DeckID($0) }
-        _model = State(initialValue: AddNoteModel(preselectedDeckId: resolved, initialDraft: initialDraft))
+        _model = State(initialValue: AddNoteModel(
+            preselectedDeckId: resolved, initialDraft: initialDraft,
+            isVocabularyImport: isVocabularyImport,
+            vocabularyTag: vocabularyTag, requestTag: requestTag
+        ))
+        self.isVocabularyImport = isVocabularyImport
         self.onSave = onSave
+        self.onCancel = onCancel
     }
 
     package var body: some View {
         NavigationStack {
             AddNoteContent(model: model)
+                .disabled(model.isSaving)
                 .navigationTitle("Add Note")
                 .navigationBarTitleDisplayMode(.inline)
-                .interactiveDismissDisabled(model.isSaving || model.hasUnsavedChanges)
+                .interactiveDismissDisabled(isVocabularyImport || model.isSaving || model.hasUnsavedChanges)
                 .confirmationDialog(
                     "Discard this note?",
                     isPresented: $showDiscardConfirm,
                     titleVisibility: .visible
                 ) {
-                    Button("Discard", role: .destructive) { dismiss() }
+                    Button("Discard", role: .destructive) {
+                        onCancel()
+                        dismiss()
+                    }
                     Button("Cancel", role: .cancel) {}
                 } message: {
                     Text("The note hasn't been added yet. Discarding loses what you typed.")
+                }
+                .alert("Possible duplicate", isPresented: $model.showDuplicateWarning) {
+                    Button("Add Anyway") { Task { await save(allowDuplicate: true) } }
+                    Button("Keep Editing", role: .cancel) {}
+                } message: {
+                    Text("A note with this Front value already exists in the selected note type.")
                 }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
@@ -50,6 +72,7 @@ package struct AddNoteView: View {
                             if model.hasUnsavedChanges {
                                 showDiscardConfirm = true
                             } else {
+                                onCancel()
                                 dismiss()
                             }
                         }
@@ -57,17 +80,19 @@ package struct AddNoteView: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Add") {
-                            Task {
-                                if await model.save() {
-                                    onSave()
-                                    dismiss()
-                                }
-                            }
+                            Task { await save() }
                         }
-                        .disabled(model.isSaving || model.fieldValues.allSatisfy(\.isEmpty))
+                        .disabled(isVocabularyImport ? !model.canSave : model.isSaving || model.fieldValues.allSatisfy(\.isEmpty))
                     }
                 }
                 .task { await model.loadData() }
+        }
+    }
+
+    private func save(allowDuplicate: Bool = false) async {
+        if await model.save(allowDuplicate: allowDuplicate) {
+            onSave()
+            dismiss()
         }
     }
 }

@@ -1,5 +1,17 @@
 # Architecture
 
+## Bounded vocabulary completion (2026-10-23)
+
+The user-authorized vocabulary editor remains the existing Browse AddNoteView,
+with RootFeature handling a bounded queue and profile-safe presentation.
+Schema-v1 optional examples, request UUID and front-reading metadata are
+validated in engine-free AppCore. A SHA256 word tag supplies a stable native
+Anki search key; request tags prevent replay without a second database.
+Single-card compatibility is projected from existing Notetype metadata through
+NotetypesService. Only explicit Add writes via the existing service/Rust path;
+fixed content-free completion URLs return saved/cancelled after dismissal.
+No App Group, entitlement, dependency or application identity change is needed.
+
 How Amgi is structured. Two companion documents go deeper:
 [RUST_BRIDGE.md](RUST_BRIDGE.md) for the engine seam, and
 [DATA_FLOWS.md](DATA_FLOWS.md) for what a user action turns into.

@@ -40,6 +40,16 @@ public struct Notetype: Sendable, Hashable, Identifiable {
         self.templates = templates
     }
 
+    /// A vocabulary import needs one normal card that actually renders both
+    /// named fields. Reversed and cloze types cannot safely use this mapping.
+    public var supportsSingleCardVocabulary: Bool {
+        guard config.kind == .normal, templates.count == 1,
+              fields.first?.name == "Front",
+              fields.contains(where: { $0.name == "Back" }) else { return false }
+        return templates[0].config.qFormat.contains("{{Front}}")
+            && templates[0].config.aFormat.contains("{{Back}}")
+    }
+
     public enum Kind: Int, Sendable, Hashable, Codable, CaseIterable {
         case normal = 0
         case cloze = 1

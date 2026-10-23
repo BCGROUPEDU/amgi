@@ -1,5 +1,39 @@
 # Agent handoff
 
+## Vocabulary editor / Lock Screen companion integration (2026-10-23, pending verification)
+
+- User requests the full FuriLens vocabulary workflow. Isolated worktree/branch
+  `codex/vocabulary-export-editor` from d78f72b preserves the original checkout,
+  all data and signing. Candidate version0.2.0(8), same application/widget IDs,
+  SDK/dependencies/entitlements. No native Rust/database/scheduling changes.
+- Schema-v1 optional bounded examples/provenance, requestUUID and front-reading
+  switch preserve legacy payloads. Every incoming text is validated and HTML
+  escaped. Fixed content-free completion URLs only after explicit save/cancel;
+  no note creation on URL receipt. Sender and receiver source harness234 PASS.
+- Root queues at most8 requests behind onboarding/review/import, rejects
+  repeated active request IDs and clears drafts on profile switch. Editor uses
+  existing deck picker and single-card normal Front/Back type metadata; no new
+  database/templates/decks. Native tag/dupe queries warn on same vocabulary,
+  protect saved-request replay, and stop writes on query failures. Add Anyway
+  is explicit; fields disable during writes and completed saves cannot repeat.
+- Word fingerprint follows the original FuriLens word if someone edits rich
+  Front afterward; this is a conservative warning, not semantic deduplication.
+  Existing arbitrary legacy cards without the fingerprint remain limited by
+  Anki's first-field matching. Custom/localized field names and reversed/Cloze
+  types deliberately require a compatible Basic type rather than lossy mapping.
+- Deterministic receiver/parser, duplicate/replay/confirmation/overlap/save-state
+  and normal-vs-Cloze/reversed type tests added. Complete iOS suites/build are
+  pending the established Xcode26.3 workflow; localXcode16.4/Swift6.1.2 and missing
+  native framework cannot validate Swift6.2 packages. CI branch gate now covers
+  this new branch only in addition to M11, plus AnkiKitTests; no public release.
+- Full successful AddNoteModel write cannot be mocked from the feature package
+  because NewNoteTemplate has an intentional cross-package constructor boundary.
+  No access widening/unsafe initializer was introduced. Physical Cancel zero/
+  Add exactly one note/card, editability and callback observation remain required.
+- No phone install performed. Backup and matching existing SideStore identity/
+  entitlement gates still apply; never uninstall or guess the installed source.
+  See `Documentation/VOCABULARY_EXPORT.md`.
+
 ## M11 receiver artifact verified (2026-10-22 — current)
 
 - Replacement run https://github.com/BCGROUPEDU/amgi/actions/runs/39691708291 completed **SUCCESS**, verified source **5ebd3f6f3f962d2679ee49ddcae307431b28778b**. Simulator build-for-testing and unsigned iphoneos Release archive passed. Later documentation commits do not change that artifact's source.

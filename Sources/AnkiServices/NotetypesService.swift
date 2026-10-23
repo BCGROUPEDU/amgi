@@ -32,7 +32,8 @@ extension NotetypesService: DependencyKey {
                 return NotetypeInfo(
                     id: notetype.id,
                     name: notetype.name,
-                    fieldNames: notetype.fields.map(\.name)
+                    fieldNames: notetype.fields.map(\.name),
+                    supportsSingleCardVocabulary: notetype.supportsSingleCardVocabulary
                 )
             },
             getNotetypeFields: { id in

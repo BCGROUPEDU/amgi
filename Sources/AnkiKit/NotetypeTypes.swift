@@ -9,11 +9,13 @@ public struct NotetypeInfo: Sendable {
     public let id: NotetypeID
     public let name: String
     public let fieldNames: [String]
+    public let supportsSingleCardVocabulary: Bool
 
-    package init(id: NotetypeID, name: String, fieldNames: [String]) {
+    package init(id: NotetypeID, name: String, fieldNames: [String], supportsSingleCardVocabulary: Bool) {
         self.id = id
         self.name = name
         self.fieldNames = fieldNames
+        self.supportsSingleCardVocabulary = supportsSingleCardVocabulary
     }
 }
 
