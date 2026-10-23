@@ -1,5 +1,19 @@
 # Agent handoff
 
+## Exact verification run (2026-10-23)
+
+Feature source **b9eea85edfc2b2ce346afc0fa8587412be2c1e08** is pushed on
+`codex/vocabulary-export-editor`. One established workflow dispatched:
+https://github.com/BCGROUPEDU/amgi/actions/runs/39907143931 . It is currently
+**IN PROGRESS**, not a full-suite/archive/IPA pass. The branch-scoped test step
+includes AppCoreTests, BrowseFeatureTests and AnkiKitTests; earlier96/96 M11 is
+old-source evidence only. The independent sender/receiver source checks234 PASS.
+No new device installation, signing change or note write. Inspect exact run,
+repair only real failures, then verify version0.2.0(8)/artifact SHA and preserve
+the existing SideStore identity/backup before upgrading. FuriLens counterpart
+382796df8295,1.0(5),481 tests/unsigned iphoneos Release PASS; phone acceptance
+remains pending while user is away.
+
 ## Vocabulary editor / Lock Screen companion integration (2026-10-23, pending verification)
 
 - User requests the full FuriLens vocabulary workflow. Isolated worktree/branch
