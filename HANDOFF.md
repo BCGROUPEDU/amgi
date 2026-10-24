@@ -1,5 +1,26 @@
 # Agent handoff
 
+## Receiver package verified / installation awaiting secure login (2026-10-24)
+
+- Exact-source run40049854557 on4460bd98e9b2772b0867c3c58b23950fb01e568c
+  completed SUCCESS. Downloaded logs prove **137/137 relevant Swift Testing
+  tests PASS**: AnkiKit33/9 suites, AppCore34/4, BrowseFeature70/10. Complete
+  three relevant suites, not every repository package. Release ARCHIVE SUCCEEDED.
+- Actual unsigned IPA0.2.0(8):30,795,063 bytes, SHA256
+  `73a0d4e5a5e67923128877a86c9e5bb973787b37cf7a37bbe0e13ac7b27395a1`,
+  matching the run's build summary/source. Safe relative106 ZIP entries,
+  com.amgiapp.AmgiApp/amgi scheme/iOS18 minimum, no signature/profile.
+  Delivery/evidence directory in FuriLens ignored build/Amgi-vocabulary-4460bd9/.
+- Apple tools still report installed0.2.0(7), same SideStore-suffixed identity
+  com.amgiapp.AmgiApp.26QAK2CBK9. CUA is blocked at iPhone Mirroring's legitimate
+  Mac login prompt; user must enter it locally then keep iPhone physically
+  locked for connection. No credentials entered, IPA installed, app removed,
+  account/signing identity changed or collection/note written.
+- Next: matching existing SideStore account/team/data-preserving upgrade with
+  confirmed external backup, verify installed build8, then test editable fields,
+  Cancel zero, explicit Add exactly one, duplicate/replay in isolated Basic deck.
+  Cross-app physical acceptance is pending, not implied by137 passing tests.
+
 ## Replacement verification provenance (2026-10-24)
 
 Repair4460bd98e9b2772b0867c3c58b23950fb01e568c is pushed. One replacement

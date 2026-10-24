@@ -29,6 +29,13 @@ Testing suites need the existing Xcode26.3 CI path (local Swift6.1.2 is too old)
 CI on this feature branch runs AppCoreTests, BrowseFeatureTests and AnkiKitTests
 before archiving an unsigned IPA. No tag/public release/TestFlight submission.
 
+Verified2026-10-24: run40049854557 at4460bd9 completed successfully. Downloaded
+logs show137/137 tests across those three suites (AppCore34, BrowseFeature70,
+AnkiKit33), and unsigned Release archive succeeded. Candidate0.2.0(8) IPA
+SHA256:`73a0d4e5a5e67923128877a86c9e5bb973787b37cf7a37bbe0e13ac7b27395a1`.
+The phone still has0.2.0(7); secure Mirroring login/SideStore upgrade and physical
+edit/Cancel/Add acceptance remain pending. This is not device acceptance.
+
 An unsigned IPA is not an installation receipt. Preserve the user's external
 backup, existing SideStore account/team/application identifier and entitlements.
 Never uninstall or change IDs to match an inferred signing suffix. On a labeled
