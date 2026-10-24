@@ -43,7 +43,7 @@ public struct VocabularyImportDraft: Codable, Equatable, Sendable {
         var details: [String] = []
         if let readingValue { details.append("<div><b>Reading:</b> \(readingValue)</div>") }
         if !definitions.isEmpty { details.append("<div><b>Meaning:</b> \(definitions)</div>") }
-        if let sentence { details.append("<div><b>Context:</b> \(sentence)</div>") }
+        if let sentence { details.append("<div><b>Example sentence:</b> \(sentence)</div>") }
         if let translation { details.append("<div><b>Translation:</b> \(translation)</div>") }
         details.append("<div><b>Source:</b> \(source)</div>")
         let back = details.joined()
@@ -65,6 +65,10 @@ public struct VocabularyImportDraft: Codable, Equatable, Sendable {
         if let sentence {
             fields["Sentence"] = sentence
             fields["Context"] = sentence
+            fields["Example"] = sentence
+            fields["Example Sentence"] = sentence
+            fields["ExampleSentence"] = sentence
+            fields["Example Sentences"] = sentence
         }
         if let translation { fields["Translation"] = translation }
         return fields

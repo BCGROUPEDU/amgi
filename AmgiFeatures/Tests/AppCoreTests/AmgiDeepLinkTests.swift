@@ -26,6 +26,8 @@ struct AmgiDeepLinkTests {
         #expect(draft.addNoteFieldValues["Front"] == "新宿")
         #expect(draft.addNoteFieldValues["Definition"] == "Shinjuku; &lt;station&gt;")
         #expect(draft.addNoteFieldValues["Back"]?.contains("<b>Reading:</b> しんじゅく") == true)
+        #expect(draft.addNoteFieldValues["Back"]?.contains("<b>Example sentence:</b> 新宿駅") == true)
+        #expect(draft.addNoteFieldValues["Example Sentence"] == "新宿駅")
         #expect(draft.addNoteFieldValues["Back"]?.contains("<b>Source:</b> FuriLens") == true)
     }
 
