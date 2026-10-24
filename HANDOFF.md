@@ -1,5 +1,14 @@
 # Agent handoff
 
+## Real sender routing confirmed by user (2026-10-24)
+
+User confirms **Yes, the correct editable note opens** for actual direct-phone
+FuriLens Learn→selected word→Add to Amgi→Continue. This verifies routing from
+the real sender, beyond the synthetic receiver checks below. Additional draft
+was not requested to be saved; its final cancellation/save is unobserved.
+No new source, build, tests or collection writes by agent. Formatting issues,
+rendered-card layout and other physical checks remain explicitly open.
+
 ## Build8 installed / real-device synthetic receiver checks (2026-10-24)
 
 - User approved installer-only upload to their own iCloud. Destination SHA256

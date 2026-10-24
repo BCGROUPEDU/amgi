@@ -37,8 +37,9 @@ The phone is now verified0.2.0(8), same SideStore-signed application identifier.
 Real-device synthetic QA in FuriLens QA 2026-10-24: incoming fields editable;
 Cancel/Discard leaves0 cards; explicit rapid Add produces1 Basic card; replay
 of saved UUID is blocked and final card count remains1. Existing decks retained.
-Actual FuriLens camera selection/export still needs direct-phone confirmation;
-Mirroring cannot access camera. Browse exposes rich Front HTML tags and the
+User directly confirms the actual FuriLens Learn→word→export workflow opens the
+correct editable note. Additional draft save/cancel is unobserved. Mirroring
+cannot access camera. Browse exposes rich Front HTML tags and the
 editor concatenates block text; rendered study-card layout is not yet observed.
 No note was added to a production deck. Choose destination explicitly because
 imports currently default to the first deck.
