@@ -181,6 +181,8 @@ final class AddNoteModel {
             for protected in [vocabularyTag, requestTag].compactMap({ $0 }) where !tagList.contains(protected) {
                 tagList.append(protected)
             }
+            // The concurrent backend hop captures only an immutable snapshot.
+            let tagsToSave = tagList
             if isVocabularyImport {
                 // Anki's dupe operator checks the notetype's first field using
                 // the engine's own normalization. Errors stop the write.
@@ -229,7 +231,7 @@ final class AddNoteModel {
             try await backendOffload {
                 var template = try notes.newNote(notetypeID)
                 template.fields = fields
-                template.tags = tagList
+                template.tags = tagsToSave
                 try notes.addNote(template, deckID)
             }
             // addNote doesn't surface OpChanges yet — invalidate the shared

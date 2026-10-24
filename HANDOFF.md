@@ -1,5 +1,22 @@
 # Agent handoff
 
+## Receiver compiler repair (2026-10-24)
+
+- Exact run39907143931 on b9eea85 completed FAILURE in simulator
+  build-for-testing: AddNoteModel.swift232 captured mutable tagList in
+  concurrently executing backendOffload. No tests, archive or IPA were produced.
+- Minimal repair snapshots the completed tags into immutable tagsToSave before
+  the hop. Payload, duplicate/replay rules, saved fields, note service and data
+  semantics are unchanged. Cheap bounded reviewer reproduced the old diagnostic
+  and verified the snapshot with Swift6 language/strict concurrency on the host;
+  no other newly added mutable captures in this save path were found.
+- Full compatible CI rerun is still required; isolated typechecking is not an
+  Amgi app pass. Local artifacts remain old0.2.0(7), not this candidate0.2.0(8).
+- Paired iPhone inventory confirms existing Amgi0.2.0(7) and FuriLens1.0(3).
+  No receiver installation, certificate/profile/identity change or note write.
+  FuriLens current signed build stops on missing widget provisioning profile;
+  preserve identity/data/backup gates and do not bypass Apple provisioning.
+
 ## Exact verification run (2026-10-23)
 
 Feature source **b9eea85edfc2b2ce346afc0fa8587412be2c1e08** is pushed on
