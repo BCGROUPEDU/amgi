@@ -1,5 +1,17 @@
 # Agent handoff
 
+## Exact formatting verification run (2026-10-24)
+
+Product **a22c225cd260536b457359588915be87f0eadb0a**, candidate0.2.0(9), pushed.
+One changed-source run **40098673249** verified at that exact SHA is IN PROGRESS:
+https://github.com/BCGROUPEDU/amgi/actions/runs/40098673249 . Native-framework
+stage last observed, no full iOS test/archive/new artifact claim.9 host helper
+tests pass, changed UIKit files and all12 test methods typecheck with local
+simulator SDK/Swift6 strict concurrency. Existing build8 remains installed and
+human-confirmed sender routing unchanged. Wait for this run; do not redispatch.
+FuriLens normal signing refresh still reuses profile expiringOct25 19:22JST;
+widget UI needs user Mac login in Mirroring. No data/signing/account changes.
+
 ## Rich-text display cleanup candidate9 (2026-10-24, verification pending)
 
 User approves the observed formatting repairs, not a new feature milestone.
