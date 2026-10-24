@@ -1,5 +1,28 @@
 # Agent handoff
 
+## Rich-text display cleanup candidate9 (2026-10-24, verification pending)
+
+User approves the observed formatting repairs, not a new feature milestone.
+Known-good checkpoint731be12 retains installed build8/4460bd9, real sender
+confirmation and synthetic Cancel0/Add1/replay acceptance. Candidate0.2.0(9)
+adds a Foundation-only NoteFieldDisplayText projection for editor block breaks
+and browser one-line titles, without changing stored notes merely by viewing.
+Explicit plain-text edits escape literal markup and store line breaks as br;
+unchanged focus/blur preserves original HTML. Source-HTML/media mode remains
+raw, no web renderer/network/dependencies. Long capped fields can scroll.
+No receiver/schema/database/scheduling/signing/identity changes.
+
+Actual helper source +9 deterministic tests PASS in an isolated host fixture
+at /private/tmp/amgi-display-tests.dDX7Jp; this does not lower Amgi's Swift6.2
+requirement or constitute an app build. Changed UIKit files separately typecheck
+against local iOS18.5 SDK/Swift6 strict concurrency. Three additional iOS-only
+delegate tests cover no-edit preservation, edited line-break encoding and raw
+media/source mode; all12 tests typecheck against the local simulator SDK after
+adding its Testing framework search path (not iOS test execution). Full relevant
+simulator suites and Release archive require
+one changed-source Xcode26.3 CI run before candidate9 installation. Build8 stays
+installed and its existing data/QA card are untouched by these source edits.
+
 ## Real sender routing confirmed by user (2026-10-24)
 
 User confirms **Yes, the correct editable note opens** for actual direct-phone

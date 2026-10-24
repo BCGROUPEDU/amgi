@@ -14,7 +14,7 @@ import UIKit
 /// HTML source for fields that contain embedded media.
 ///
 /// Anki stores field values as HTML fragments. This editor strips HTML tags for
-/// display/editing and writes back plain text on change. This avoids the crash-
+/// display/editing and encodes plain-text edits back to HTML. This avoids the crash-
 /// prone `NSAttributedString` HTML parsing path.
 struct RichNoteFieldEditor: UIViewRepresentable {
     @Binding var htmlText: String
@@ -32,7 +32,7 @@ struct RichNoteFieldEditor: UIViewRepresentable {
     private let clearFormatTitle = "Clear formatting"
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(htmlText: $htmlText)
+        Coordinator(htmlText: $htmlText, preservesSourceHTML: preservesSourceHTML)
     }
 
     func makeUIView(context: Context) -> UITextView {
@@ -60,10 +60,14 @@ struct RichNoteFieldEditor: UIViewRepresentable {
         guard let width = proposal.width, width > 0 else { return nil }
         let fit = uiView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
         let height = min(max(32, fit.height), 160)
+        // Capped fields must remain scrollable, including longer imported
+        // context/example sections after restoring their HTML line breaks.
+        uiView.isScrollEnabled = fit.height > 160
         return CGSize(width: width, height: height)
     }
 
     func updateUIView(_ uiView: UITextView, context: Context) {
+        context.coordinator.preservesSourceHTML = preservesSourceHTML
         guard !context.coordinator.isEditing else { return }
         guard htmlText != context.coordinator.lastRenderedValue else { return }
 
@@ -86,9 +90,11 @@ struct RichNoteFieldEditor: UIViewRepresentable {
         var lastRenderedValue: String = ""
         var lastPlainText: String = ""
         var isEditing = false
+        var preservesSourceHTML: Bool
 
-        init(htmlText: Binding<String>) {
+        init(htmlText: Binding<String>, preservesSourceHTML: Bool = false) {
             self._htmlText = htmlText
+            self.preservesSourceHTML = preservesSourceHTML
         }
 
         func attach(textView: UITextView) {
@@ -162,30 +168,7 @@ struct RichNoteFieldEditor: UIViewRepresentable {
 
         /// Strips HTML tags and decodes common entities to produce editable plain text.
         static func plainText(from html: String) -> String {
-            guard !html.isEmpty else { return "" }
-            guard isLikelyHTML(html) else { return html }
-
-            var result = ""
-            result.reserveCapacity(html.count)
-            var inTag = false
-            for ch in html.unicodeScalars {
-                switch ch {
-                case "<": inTag = true
-                case ">": inTag = false
-                default:
-                    if !inTag { result.unicodeScalars.append(ch) }
-                }
-            }
-
-            result = result
-                .replacingOccurrences(of: "&amp;",  with: "&")
-                .replacingOccurrences(of: "&lt;",   with: "<")
-                .replacingOccurrences(of: "&gt;",   with: ">")
-                .replacingOccurrences(of: "&quot;", with: "\"")
-                .replacingOccurrences(of: "&#39;",  with: "'")
-                .replacingOccurrences(of: "&nbsp;", with: " ")
-
-            return result.trimmingCharacters(in: .whitespacesAndNewlines)
+            NoteFieldDisplayText.plainText(from: html)
         }
 
         static func normalizedStoredHTML(from text: String) -> String {
@@ -396,14 +379,13 @@ private extension RichNoteFieldEditor {
 
 private extension RichNoteFieldEditor.Coordinator {
     func commit(_ plain: String) {
-        let normalized = Self.normalizedStoredHTML(from: plain)
+        guard plain != lastPlainText else { return }
+        let normalized = preservesSourceHTML
+            ? Self.normalizedStoredHTML(from: plain)
+            : NoteFieldDisplayText.storedHTML(fromPlainText: plain)
         lastPlainText = plain
         lastRenderedValue = normalized
         htmlText = normalized
-    }
-
-    static func isLikelyHTML(_ text: String) -> Bool {
-        text.contains("<") && text.contains(">")
     }
 
     static func trimMathJaxBreaks(in text: String) -> String {

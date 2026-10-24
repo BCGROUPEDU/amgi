@@ -3,6 +3,13 @@
 Candidate:0.2.0(8), feature branch `codex/vocabulary-export-editor`.
 Base:d78f72b. No data, bundle ID, team, entitlements or dependencies changed.
 
+Follow-up candidate0.2.0(9) fixes the observed raw-HTML browser title and missing
+editor block boundaries through a shared non-rendering text projection. Viewing
+or focusing a field does not rewrite its stored HTML; deliberate plain edits
+encode line breaks/literal characters correctly. Long fields remain scrollable.
+Nine host helper tests pass; full iOS suites/archive and candidate9 physical
+installation remain pending. Build8 is still the installed accepted receiver.
+
 FuriLens sends a schema-v1 JSON draft with optional up-to-two examples
 (`japanese`, optional `english`, `source`), request UUID and front-reading
 choice. Old payloads still work. Limits:128 surface/reading characters,
