@@ -1,5 +1,33 @@
 # Agent handoff
 
+## Build8 installed / real-device synthetic receiver checks (2026-10-24)
+
+- User approved installer-only upload to their own iCloud. Destination SHA256
+  matches73a0d4e…395a1. SideStore selected exact0.2.0(8)/4460bd9 package and
+  Keep App Extensions (Use Main Profile), existing account. Apple tools confirm
+  installed **0.2.0(8), com.amgiapp.AmgiApp.26QAK2CBK9**, receipt in counterpart
+  FuriLens`build/Amgi-post-update-20261024.json`. No uninstall, source identity/
+  signing-setting edit, account change or certificate revocation. Original three
+  decks remain visible; collection writes are limited to the QA deck/note below.
+- Added isolated FuriLens QA 2026-10-24 deck through app UI. Incoming synthetic
+  新宿駅 schema-v1 request opens editable Add Note; all supplied reading/gloss/
+  context/translation/example fields present. QA/Basic selected explicitly.
+  Edited Front then Cancel/Discard→deck still0/0/0/no cards. New request UUID
+  ending6402, explicit Add double-click→one new card and one Browse note row.
+  Inspected saved fields without editing/studying. Same UUID replay+Add reports
+  **This vocabulary request was already saved.** Cancel→QA remains1/0/0.
+  Only one synthetic QA note/card written; no production deck edits or sync.
+- Callback opens FuriLens, triggering Mirroring's camera-unavailable notice.
+  Quit Mirroring and asked user for actual phone Learn→word→export confirmation.
+  Real sender pending-request receipt, OCR, translation and widget behavior are
+  not accepted by these synthetic receiver checks. No app deletion to test
+  missing receiver. Prior137 cloud and234 source checks remain separate.
+- Observed remaining UI issue: Browse displays rich Front <div> tags and editor
+  visually concatenates HTML block sections. Saved content is retained; study
+  rendering unobserved. Import defaults to first deck; select destination.
+  Delivery-only turn, no new code/build/automated suite. A bounded display fix
+  needs a separately tested candidate, not an unverified on-device hot patch.
+
 ## Receiver package verified / installation awaiting secure login (2026-10-24)
 
 - Exact-source run40049854557 on4460bd98e9b2772b0867c3c58b23950fb01e568c

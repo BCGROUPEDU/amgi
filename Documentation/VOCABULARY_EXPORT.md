@@ -33,8 +33,15 @@ Verified2026-10-24: run40049854557 at4460bd9 completed successfully. Downloaded
 logs show137/137 tests across those three suites (AppCore34, BrowseFeature70,
 AnkiKit33), and unsigned Release archive succeeded. Candidate0.2.0(8) IPA
 SHA256:`73a0d4e5a5e67923128877a86c9e5bb973787b37cf7a37bbe0e13ac7b27395a1`.
-The phone still has0.2.0(7); secure Mirroring login/SideStore upgrade and physical
-edit/Cancel/Add acceptance remain pending. This is not device acceptance.
+The phone is now verified0.2.0(8), same SideStore-signed application identifier.
+Real-device synthetic QA in FuriLens QA 2026-10-24: incoming fields editable;
+Cancel/Discard leaves0 cards; explicit rapid Add produces1 Basic card; replay
+of saved UUID is blocked and final card count remains1. Existing decks retained.
+Actual FuriLens camera selection/export still needs direct-phone confirmation;
+Mirroring cannot access camera. Browse exposes rich Front HTML tags and the
+editor concatenates block text; rendered study-card layout is not yet observed.
+No note was added to a production deck. Choose destination explicitly because
+imports currently default to the first deck.
 
 An unsigned IPA is not an installation receipt. Preserve the user's external
 backup, existing SideStore account/team/application identifier and entitlements.
