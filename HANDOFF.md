@@ -1,5 +1,15 @@
 # Agent handoff
 
+## Replacement verification provenance (2026-10-24)
+
+Repair4460bd98e9b2772b0867c3c58b23950fb01e568c is pushed. One replacement
+run **40049854557** uses this exact source and is IN PROGRESS:
+https://github.com/BCGROUPEDU/amgi/actions/runs/40049854557 . Old39907143931
+FAILED before tests/archive; never use it as IPA or test acceptance evidence.
+Actual sender/receiver source checks234 PASS reran; the exact tag-snapshot
+pattern typechecks with Swift6 strict concurrency. Full app/suites still need
+the compatible cloud result; data/signing/installation remain untouched.
+
 ## Receiver compiler repair (2026-10-24)
 
 - Exact run39907143931 on b9eea85 completed FAILURE in simulator
